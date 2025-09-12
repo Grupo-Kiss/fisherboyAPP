@@ -1,29 +1,36 @@
 <template>
   <div id="ui-overlay">
-    <div id="top-left-panel" :style="{ backgroundColor: currentZoneColor }">
-      <div class="stats-container">
-        <img src="/src/img/fisherboy.svg" alt="Fisherboy Logo" class="game-logo" />
+    <div id="top-left-panel">
+      <div class="stats-line">
         <div class="stat-item">💰 {{ getMoney }}</div>
         <div class="stat-item">🐟 {{ getCommonFishCount }}</div>
         <div class="stat-item">✨ {{ getExoticFishCount }}</div>
         <div class="stat-item">🗑️ {{ getTrashCount }}</div>
         <div class="stat-item">💎 {{ getTreasuresCount }}</div>
-        <div class="stat-item">📍 {{ currentZoneName }}</div>
+      </div>
+      <div class="stats-line">
+        <div class="stat-item">{{ currentZoneName }}</div>
         <div class="stat-item">{{ formattedTime }}</div>
         <Weather />
-        <div id="energy-bar" :class="energyColorClass">
-          <div id="energy-fill" :style="{ width: getEnergy + '%' }"></div>
-        </div>
       </div>
     </div>
 
+    <div id="energy-bar-container" :class="energyColorClass">
+      <div id="energy-fill" :style="{ height: getEnergy + '%' }"></div>
+    </div>
+
     <img src="/src/img/muelle.svg" alt="Muelle" class="muelle-img" />
+
+    <div id="deep-fish-button-container">
+      <button class="btn-icon" @click="startDeepFishing">⚓<span class="btn-label">Pesca Profunda</span></button>
+      <button class="btn-icon" @click="useConsumable('coffee')" :disabled="consumableInventory.coffee === 0">☕<span class="btn-label">Café ({{ consumableInventory.coffee }})</span></button>
+      <button class="btn-icon" @click="useConsumable('energyDrink')" :disabled="consumableInventory.energyDrink === 0">🥤<span class="btn-label">Energizante ({{ consumableInventory.energyDrink }})</span></button>
+    </div>
 
     <MessageConsole />
     <div id="bottom-bar">
         <button class="btn-icon" @click="goToSleep" :disabled="!canSleep">🛏️<span class="btn-label">Descansar</span><span class="btn-text">(${{ sleepCost }})</span></button>
         <button class="btn-icon" @click="toggleModal('recycle')">♻️<span class="btn-label">Reciclar</span></button>
-        <button class="btn-icon" @click="startDeepFishing">⚓<span class="btn-label">Pesca Profunda</span></button>
         <button class="btn-icon" @click="toggleModal('market')">🛒<span class="btn-label">Mercado</span></button>
         <button class="btn-icon" @click="openMap">🗺️<span class="btn-label">Mapa</span></button>
         <button class="btn-icon" @click="toggleModal('settings')">⚙️<span class="btn-label">Ajustes</span></button>
@@ -88,6 +95,7 @@ export default {
       getEnergy,
       energyColorClass,
       sleepCost,
+      consumableInventory: computed(() => store.getters.getConsumableInventory),
       formattedTime: computed(() => {
         const totalMinutes = Math.round(store.getters.getGameTime);
         let hours = Math.floor(totalMinutes / 60) % 24;
@@ -99,10 +107,11 @@ export default {
         const dayOfMonth = Math.floor((gameDay - 1) / 12) + 1;
         const monthName = months[monthIndex];
 
-        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} - Día ${dayOfMonth} de ${monthName}`;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} - ${dayOfMonth} de ${monthName}`;
       }),
       goToSleep: () => store.dispatch('goToSleep'),
       startDeepFishing: () => store.dispatch('startDeepFishing'),
+      useConsumable: (consumable) => store.dispatch('useConsumable', consumable),
       toggleModal: (modal) => store.dispatch('toggleModal', modal),
       openMap: () => store.dispatch('toggleModal', 'map'),
       getModals: computed(() => store.getters.getModals),
@@ -129,47 +138,48 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
   background: rgba(0, 0, 0, 0.75);
   color: white;
-  width: 100%;
+  border-radius: 0;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   z-index: 100;
-  padding: 5px 0;
+  padding: 5px 10px;
 }
 
-.stats-container {
+.stats-line {
   display: flex;
   align-items: center;
-  overflow-x: auto;
-  white-space: nowrap;
-  padding: 0 10px;
-}
-
-.game-logo {
-  height: 30px;
-  margin-right: 15px;
+  justify-content: space-between;
+  padding: 2px 0;
 }
 
 .stat-item {
-  font-size: 0.9em;
+  font-size: 0.8em;
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-right: 15px;
 }
 
-#energy-bar {
-  width: 100px;
-  height: 18px;
+#energy-bar-container {
+  position: fixed;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 150px;
   background: rgba(0,0,0,0.6);
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 100;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 #energy-fill {
-  height: 100%;
-  transition: width 0.5s, background-color 0.5s;
+  width: 100%;
+  transition: height 0.5s, background-color 0.5s;
+  position: absolute;
+  bottom: 0;
 }
 
 .energy-high #energy-fill {
@@ -199,6 +209,17 @@ export default {
   width: 300px; /* Adjust as needed */
   height: auto;
   z-index: 90; /* Below info panels (z-index 100) */
+}
+
+#deep-fish-button-container {
+  position: fixed;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 #bottom-bar {

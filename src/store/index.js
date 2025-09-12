@@ -26,6 +26,10 @@ const initialState = {
     caughtTrashInventory: [],
     caughtTreasuresInventory: [],
     fishCaughtSinceSleep: 0,
+    consumableInventory: {
+      coffee: 0,
+      energyDrink: 0,
+    },
     fishingStats: {
     totalCaught: 0,
     totalValue: 0,
@@ -156,12 +160,8 @@ const initialState = {
     { name: "Bolsa de Plástico", recycleValue: 56 },
     { name: "Caña Rota", recycleValue: 1444 },
     { name: "Contenedor de Aceite", recycleValue: 2406 },
-    { name: "Bebida Energizante", recycleValue: 10, energy: 20 },
-    { name: "Café", recycleValue: 5, energy: 10 },
-    ],
-    energyItems: [
-      { name: "Café", price: 50, energy: 10 },
-      { name: "Bebida Energizante", price: 150, energy: 20 },
+    { name: "Bebida Energizante", recycleValue: 10, consumable: { name: 'energyDrink', energy: 20 } },
+    { name: "Café", recycleValue: 5, consumable: { name: 'coffee', energy: 10 } },
     ],
     fishTypes: [
     // Zone 1: Lago Clemente
@@ -376,6 +376,12 @@ const store = createStore({
             goal.current = uniqueTreasures.size;
         }
         },
+        addConsumable(state, { consumable, quantity }) {
+            state.consumableInventory[consumable] += quantity;
+        },
+        useConsumable(state, consumable) {
+            state.consumableInventory[consumable]--;
+        },
     },
     actions: {
         restartGame({ commit }) {
@@ -510,9 +516,9 @@ const store = createStore({
 
             if (Math.random() < 0.3) {
             const trashItem = state.trashTypes[Math.floor(Math.random() * state.trashTypes.length)];
-            if (trashItem.energy) {
-                commit('setEnergy', state.energy + trashItem.energy);
-                commit('addMessage', { text: `¡Vaya! Encontraste ${trashItem.name} y te da +${trashItem.energy} de energía.`, type: 'catch' });
+            if (trashItem.consumable) {
+                commit('addConsumable', { consumable: trashItem.consumable.name, quantity: 1 });
+                commit('addMessage', { text: `¡Vaya! Encontraste ${trashItem.name}.`, type: 'catch' });
             } else {
                 commit('addCaughtTrash', trashItem);
                 commit('incrementTrashCount');
@@ -602,6 +608,48 @@ const store = createStore({
         commit('addMessage', { text: 'Lanzando la caña a las profundidades... ¿Qué misterios nos aguardan?', type: 'system' });
 
         setTimeout(() => {
+            // Treasure hunting logic
+            if (Math.random() < 0.05) { // 5% chance of finding a treasure
+                let maxTreasureValue = 400; // Default for early days
+                if (state.currentDay > 20) {
+                    maxTreasureValue = Infinity; // All treasures
+                } else if (state.currentDay > 10) {
+                    maxTreasureValue = 20000;
+                } else if (state.currentDay > 5) {
+                    maxTreasureValue = 5000;
+                }
+
+                const availableTreasures = state.treasureTypes.filter(treasure => treasure.value <= maxTreasureValue && treasure.zone === state.currentZone);
+
+                if (availableTreasures.length > 0) {
+                    const totalRarity = availableTreasures.reduce((sum, treasure) => sum + treasure.rarity, 0);
+                    let random = Math.random() * totalRarity;
+                    let treasureToCatch = null;
+
+                    for (const treasure of availableTreasures) {
+                        random -= treasure.rarity;
+                        if (random <= 0) {
+                            treasureToCatch = treasure;
+                            break;
+                        }
+                    }
+
+                    if (treasureToCatch) {
+                        commit('addMessage', { text: `¡Increíble! Has encontrado un tesoro: ${treasureToCatch.name}!`, type: 'achievement' });
+                        commit('addCaughtTreasure', treasureToCatch);
+                        commit('incrementTreasuresCount');
+                        if (treasureToCatch.value > 0) {
+                            commit('addMoney', treasureToCatch.value);
+                        }
+                        commit('updateGoalProgress', { type: 'findTreasure', amount: 1 });
+                        commit('updateUniqueTreasureGoal');
+                        commit('setIsFishing', false);
+                        commit('setFishingDepth', null);
+                        return; // End the action here
+                    }
+                }
+            }
+
             const availableFish = state.fishTypes.filter(fish => {
                 const meetsRequirements = !fish.requirements || (state.currentBoat >= fish.requirements.boat && state.currentRod >= fish.requirements.rod);
                 const availableAtTime = fish.partOfDay.includes(state.currentPartOfDay);
@@ -733,14 +781,15 @@ const store = createStore({
                 commit('updateGoalProgress', { type: 'buyBoat', amount: 1, id: boatIndex });
             }
         },
-        buyEnergyItem({ commit, state }, item) {
-          if (state.money >= item.price) {
-            commit('spendMoney', item.price);
-            commit('addEnergy', item.energy);
-            commit('addMessage', { text: `Compraste ${item.name} y recuperaste ${item.energy} de energía.`, type: 'system' });
-          } else {
-            commit('addMessage', { text: `No tienes suficiente dinero para comprar ${item.name}.`, type: 'warning' });
-          }
+        useConsumable({ commit, state }, consumableName) {
+            if (state.consumableInventory[consumableName] > 0) {
+                const consumable = initialState.trashTypes.find(t => t.consumable && t.consumable.name === consumableName).consumable;
+                commit('useConsumable', consumableName);
+                commit('addEnergy', consumable.energy);
+                commit('addMessage', { text: `Usaste ${consumableName} y recuperaste ${consumable.energy} de energía.`, type: 'system' });
+            } else {
+                commit('addMessage', { text: `No tienes ${consumableName}.`, type: 'warning' });
+            }
         },
         selectRod({ commit, state }, rodIndex) {
             if (state.unlockedRods[rodIndex]) {
@@ -862,6 +911,7 @@ const store = createStore({
         getFishingDepth: (state) => state.fishingDepth,
         getFishFighting: (state) => state.fishFighting,
         getFishToCatch: (state) => state.fishToCatch,
+        getConsumableInventory: (state) => state.consumableInventory,
     },
 });
 
