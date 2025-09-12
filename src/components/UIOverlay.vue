@@ -1,33 +1,39 @@
 <template>
   <div id="ui-overlay">
-    <div id="top-left-panel" :style="{ backgroundColor: currentZoneColor }">
-      <div id="game-stats-line-1">
+    <div id="top-left-panel">
+      <div class="stats-line">
         <div class="stat-item">💰 {{ getMoney }}</div>
         <div class="stat-item">🐟 {{ getCommonFishCount }}</div>
         <div class="stat-item">✨ {{ getExoticFishCount }}</div>
         <div class="stat-item">🗑️ {{ getTrashCount }}</div>
         <div class="stat-item">💎 {{ getTreasuresCount }}</div>
       </div>
-      <div id="game-stats-line-2">
-        <div class="stat-item">📍 {{ currentZoneName }}</div>
+      <div class="stats-line">
+        <div class="stat-item">{{ currentZoneName }}</div>
         <div class="stat-item">{{ formattedTime }}</div>
         <Weather />
-        <div id="energy-bar" :class="energyColorClass">
-          <div id="energy-fill" :style="{ width: getEnergy + '%' }"></div>
-        </div>
       </div>
+    </div>
+
+    <div id="energy-bar-container" :class="energyColorClass">
+      <div id="energy-fill" :style="{ height: getEnergy + '%' }"></div>
     </div>
 
     <img src="/src/img/muelle.svg" alt="Muelle" class="muelle-img" />
 
+    <div id="deep-fish-button-container">
+      <button class="btn-icon" @click="startDeepFishing">⚓<span class="btn-label"></span></button>
+      <button class="btn-icon" @click="useConsumable('coffee')" :disabled="consumableInventory.coffee === 0">☕<span class="btn-label"> ({{ consumableInventory.coffee }})</span></button>
+      <button class="btn-icon" @click="useConsumable('energyDrink')" :disabled="consumableInventory.energyDrink === 0">🥤<span class="btn-label"> ({{ consumableInventory.energyDrink }})</span></button>
+    </div>
+
     <MessageConsole />
     <div id="bottom-bar">
-        <button class="btn-icon" @click="goToSleep" :disabled="!canSleep">🛏️<span class="btn-text">(${{ sleepCost }})</span></button>
-        <button class="btn-icon" @click="toggleModal('recycle')">♻️</button>
-        <button class="btn-icon" @click="startDeepFishing">⚓</button>
-        <button class="btn-icon" @click="toggleModal('market')">🛒</button>
-        <button class="btn-icon" @click="openMap">🗺️</button>
-        <button class="btn-icon" @click="toggleModal('settings')">⚙️</button>
+        <button class="btn-icon" @click="goToSleep" :disabled="!canSleep">🛏️<span class="btn-label"></span><span class="btn-text">(${{ sleepCost }})</span></button>
+        <button class="btn-icon" @click="toggleModal('recycle')">♻️<span class="btn-label"></span></button>
+        <button class="btn-icon" @click="toggleModal('market')">🛒<span class="btn-label"></span></button>
+        <button class="btn-icon" @click="openMap">🗺️<span class="btn-label"></span></button>
+        <button class="btn-icon" @click="toggleModal('settings')">⚙️<span class="btn-label"></span></button>
     </div>
 
     <!-- Mobile controls will go here -->
@@ -89,6 +95,7 @@ export default {
       getEnergy,
       energyColorClass,
       sleepCost,
+      consumableInventory: computed(() => store.getters.getConsumableInventory),
       formattedTime: computed(() => {
         const totalMinutes = Math.round(store.getters.getGameTime);
         let hours = Math.floor(totalMinutes / 60) % 24;
@@ -100,10 +107,11 @@ export default {
         const dayOfMonth = Math.floor((gameDay - 1) / 12) + 1;
         const monthName = months[monthIndex];
 
-        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} - Día ${dayOfMonth} de ${monthName}`;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} - ${dayOfMonth} de ${monthName}`;
       }),
       goToSleep: () => store.dispatch('goToSleep'),
       startDeepFishing: () => store.dispatch('startDeepFishing'),
+      useConsumable: (consumable) => store.dispatch('useConsumable', consumable),
       toggleModal: (modal) => store.dispatch('toggleModal', modal),
       openMap: () => store.dispatch('toggleModal', 'map'),
       getModals: computed(() => store.getters.getModals),
@@ -130,47 +138,48 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  background: rgba(0, 0, 0, 0.7);
+  right: 0;
+  background: rgba(0, 0, 0, 0.75);
   color: white;
-  padding: 0;
   border-radius: 0;
-  width: 100%;
-  /* max-width: 500px; */
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   z-index: 100;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 5px 10px;
 }
 
-#game-stats-line-1,
-#game-stats-line-2 {
+.stats-line {
   display: flex;
-  justify-content: space-around; /* Distribute items evenly */
-  width: 100%;
-  margin-bottom: 5px; /* Small margin between lines */
   align-items: center;
+  justify-content: space-between;
+  padding: 2px 0;
 }
 
 .stat-item {
-  font-size: 1.1em; /* Adjust font size */
+  font-size: 0.8em;
   display: flex;
   align-items: center;
-  gap: 5px; /* Space between icon and text */
+  gap: 5px;
 }
 
-#energy-bar {
-  width: 100px;
-  height: 18px;
+#energy-bar-container {
+  position: fixed;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 150px;
   background: rgba(0,0,0,0.6);
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 100;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 #energy-fill {
-  height: 100%;
-  transition: width 0.5s, background-color 0.5s;
+  width: 100%;
+  transition: height 0.5s, background-color 0.5s;
+  position: absolute;
+  bottom: 0;
 }
 
 .energy-high #energy-fill {
@@ -202,6 +211,17 @@ export default {
   z-index: 90; /* Below info panels (z-index 100) */
 }
 
+#deep-fish-button-container {
+  position: fixed;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 #bottom-bar {
     position: fixed;
     bottom: 0;
@@ -209,17 +229,36 @@ export default {
     right: 0;
     display: flex;
     justify-content: space-around;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     padding: 10px 0;
     z-index: 100;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .btn-icon {
-    background: none;
-    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    font-size: 2em;
+    font-size: 1.8em;
     cursor: pointer;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-icon:active {
+    transform: scale(0.9);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-label {
+    font-size: 0.4em;
+    margin-top: 5px;
 }
 
 .btn-text {

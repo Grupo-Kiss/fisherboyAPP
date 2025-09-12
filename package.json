@@ -2,7 +2,7 @@
   "name": "fisherboy-vue",
   "version": "0.1.1",
   "private": true,
-  "homepage": "https://dcolombres.github.io/fisherboy/",
+  "homepage": "https://Grupo-Kiss.github.io/fisherboyAPP/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -10,10 +10,14 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
     "vue": "^3.2.47",
     "vuex": "^4.1.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.4.3",
     "@vitejs/plugin-vue": "^4.0.0",
     "gh-pages": "^6.3.0",
     "vite": "^4.1.4"

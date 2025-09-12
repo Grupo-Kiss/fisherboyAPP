@@ -3,6 +3,7 @@
     <div class="modal-content">
       <span class="close" @click="close">&times;</span>
       <h2>Centro de Reciclaje</h2>
+      <button class="btn btn-primary recycle-all-btn" @click="recycleAllTrash" :disabled="caughtTrashInventory.length === 0">Reciclar Todo</button>
       <div class="recycle-content">
         <div id="trash-items">
           <p v-if="caughtTrashInventory.length === 0" style="text-align: center;">No hay basura para reciclar</p>
@@ -100,6 +101,10 @@ export default {
 
 h2 {
   text-align: center;
+  margin-bottom: 20px;
+}
+
+.recycle-all-btn {
   margin-bottom: 20px;
 }
 

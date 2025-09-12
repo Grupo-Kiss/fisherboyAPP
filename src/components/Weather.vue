@@ -1,6 +1,6 @@
 <template>
   <div class="weather-display">
-    <p>Día {{ currentDay }} {{ seasonIcon }} {{ temperature }}°C</p>
+    <p>{{ seasonIcon }} {{ temperature }}°C</p>
   </div>
 </template>
 

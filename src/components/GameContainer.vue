@@ -15,6 +15,7 @@
     <Boat />
     <Storm />
     <Water />
+    <FishFight />
   </div>
 </template>
 
@@ -33,6 +34,7 @@ import InstructionsModal from './InstructionsModal.vue';
 import MapModal from './MapModal.vue';
 import CreditsModal from './CreditsModal.vue';
 import SettingsModal from './SettingsModal.vue';
+import FishFight from './FishFight.vue';
 
 import EquipmentModal from './EquipmentModal.vue';
 import Boat from './Boat.vue';
@@ -52,6 +54,7 @@ export default {
     MapModal,
     CreditsModal,
     SettingsModal,
+    FishFight,
     
     EquipmentModal,
     Boat,
@@ -94,9 +97,7 @@ export default {
 
       // If it's not a swipe, it's a tap
       if (Math.abs(deltaX) < swipeThreshold && Math.abs(deltaY) < swipeThreshold) {
-        if (fishFighting.value) {
-          store.dispatch('tapToFightFish');
-        } else {
+        if (!fishFighting.value) {
           store.dispatch('startFishing');
         }
       }

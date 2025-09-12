@@ -5,9 +5,10 @@
       <h2>Créditos</h2>
       <div class="credits-content">
         <p><strong>Desarrollador:</strong> Moro</p>
-        <p><strong>Música:</strong> Artlist.io</p>
-        <p><strong>Sonidos:</strong> Freesound.org</p>
-        <p><strong>Inspiración:</strong> Stardew Valley, Animal Crossing</p>
+        <p><strong>Música:</strong> Martín Colombres</p>
+        <p><strong>Sonidos:</strong> Elixcopter</p>
+        <p>&copy; 2025 FisherBoy v5</p>
+        <button class="share-btn" @click="share">Compartir</button>
       </div>
     </div>
   </div>
@@ -24,9 +25,24 @@ export default {
     const show = computed(() => store.state.modals.credits);
     const close = () => store.dispatch('toggleModal', 'credits');
 
+    const share = () => {
+      if (navigator.share) {
+        navigator.share({
+          title: 'FisherBoy',
+          text: '¡Estoy jugando a FisherBoy! ¡Únete a la aventura!',
+          url: 'https://grupo-kiss.github.io/fisherboyAPP/',
+        })
+          .then(() => console.log('Successful share'))
+          .catch((error) => console.log('Error sharing', error));
+      } else {
+        alert('La función de compartir no está disponible en este navegador.');
+      }
+    };
+
     return {
       show,
       close,
+      share,
     };
   },
 };
@@ -81,5 +97,21 @@ h2 {
 
 .credits-content {
   text-align: center;
+}
+
+.share-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1em;
+  margin-top: 20px;
+}
+
+.share-btn:hover {
+  background-color: #2980b9;
 }
 </style>
