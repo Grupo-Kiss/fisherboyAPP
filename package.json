@@ -2,7 +2,7 @@
   "name": "fisherboy-vue",
   "version": "0.1.1",
   "private": true,
-  "homepage": "https://dcolombres.github.io/fisherboy/",
+  "homepage": "https://Grupo-Kiss.github.io/fisherboyAPP/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
