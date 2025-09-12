@@ -58,6 +58,7 @@ const initialState = {
     map: false,
     credits: false,
     },
+    musicMuted: false,
     currentZone: 1,
     zones: [
     { id: 1, name: "Lago Clemente", cost: 0, unlocked: true, color: "#4a90e2" },
@@ -382,6 +383,7 @@ const store = createStore({
         useConsumable(state, consumable) {
             state.consumableInventory[consumable]--;
         },
+        toggleMusic(state) { state.musicMuted = !state.musicMuted; },
     },
     actions: {
         restartGame({ commit }) {
@@ -873,7 +875,10 @@ const store = createStore({
         playMusic() {
         // This action is dispatched to trigger music playback in VolumeControl.vue
         // The actual music playing logic is handled in VolumeControl.vue
-        }
+        },
+        toggleMusic({ commit }) {
+            commit('toggleMusic');
+        },
     },
     getters: {
         getMoney: (state) => state.money,

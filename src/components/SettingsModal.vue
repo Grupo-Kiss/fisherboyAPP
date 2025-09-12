@@ -11,6 +11,9 @@
         <button class="btn-restart" @click="restartGame">Reiniciar Juego</button>
         <button class="btn-credits" @click="openModal('credits')">Créditos</button>
         <button class="btn-github" @click="openGithub">GitHub</button>
+        <button class="settings-btn" @click="toggleMusic">
+          <i :class="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -40,8 +43,11 @@ export default {
     };
 
     const openGithub = () => {
-      window.open('https://github.com/Moro-AR/fisherBOY', '_blank');
+      window.open('https://github.com/Grupo-Kiss/fisherboyAPP/', '_blank');
     };
+
+    const isMuted = computed(() => store.state.musicMuted);
+    const toggleMusic = () => store.dispatch('toggleMusic');
 
     return {
       show,
@@ -49,6 +55,8 @@ export default {
       openModal,
       restartGame,
       openGithub,
+      isMuted,
+      toggleMusic,
     };
   },
 };
