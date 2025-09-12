@@ -70,7 +70,7 @@ const initialState = {
     ],
     currentGoals: [],
     completedGoals: [],
-    """    goalDefinitions: {
+        goalDefinitions: {
     // Tutorial/Early Game Goals
     'goal_catch_10_common_fish': { id: 'goal_catch_10_common_fish', description: "Pesca 10 peces comunes", type: "catchCommonFish", target: 10, reward: 2000, category: "tutorial" },
     'goal_earn_500_money': { id: 'goal_earn_500_money', description: "Gana $500", type: "earnMoney", target: 500, reward: 2000, category: "tutorial" },
@@ -138,7 +138,7 @@ const initialState = {
     'goal_complete_all_money_goals': { id: 'goal_complete_all_money_goals', description: "Completa todos los objetivos de dinero", type: "completeAllCategoryGoals", category: "money", reward: 50000, category: "completionist" },
     'goal_complete_all_recycling_goals': { id: 'goal_complete_all_recycling_goals', description: "Completa todos los objetivos de reciclaje", type: "completeAllCategoryGoals", category: "recycling", reward: 50000, category: "completionist" },
     'goal_complete_all_zone_goals': { id: 'goal_complete_all_zone_goals', description: "Completa todos los objetivos de zonas", type: "completeAllCategoryGoals", category: "zone", reward: 50000, category: "completionist" },
-    },""
+    },
     tips: [
     "Los tiburones son criaturas nocturnas. Intenta pescar de noche para tener la oportunidad de atrapar uno.",
     "Los tesoros más valiosos se esconden en las profundidades. Necesitarás el Barco Profesional para llegar a ellos.",
@@ -230,45 +230,45 @@ const initialState = {
     ],
     treasureTypes: [
     // Zone 1
-    { name: "Piedra pomez", value: 10, isCollectible: true, rarity: 0.2, zone: 1 },
-    { name: "Piedra azul", value: 50, isCollectible: true, rarity: 0.15, zone: 1 },
-    { name: "Piedra naranja brillante", value: 75, isCollectible: true, rarity: 0.1, zone: 1 },
-    { name: "Cofre del tesoro vacío", value: 100, isCollectible: true, rarity: 0.1, zone: 1 },
-    { name: "Reloj de cuco", value: 100, isCollectible: true, rarity: 0.08, zone: 1 },
+    { name: "Piedra pomez", value: 10, isCollectible: true, rarity: 0.2, zone: 1, zoneName: "Lago Clemente" },
+    { name: "Piedra azul", value: 50, isCollectible: true, rarity: 0.15, zone: 1, zoneName: "Lago Clemente" },
+    { name: "Piedra naranja brillante", value: 75, isCollectible: true, rarity: 0.1, zone: 1, zoneName: "Lago Clemente" },
+    { name: "Cofre del tesoro vacío", value: 100, isCollectible: true, rarity: 0.1, zone: 1, zoneName: "Lago Clemente" },
+    { name: "Reloj de cuco", value: 100, isCollectible: true, rarity: 0.08, zone: 1, zoneName: "Lago Clemente" },
 
     // Zone 2
-    { name: "Botella de ron añejo", value: 500, isCollectible: false, rarity: 0.07, zone: 2 },
-    { name: "Nokia 1100", value: 1100, isCollectible: true, rarity: 0.07, zone: 2 },
-    { name: "Motorola", value: 2009, isCollectible: true, rarity: 0.06, zone: 2 },
-    { name: "Casco normando", value: 1500, isCollectible: true, rarity: 0.04, zone: 2 },
+    { name: "Botella de ron añejo", value: 500, isCollectible: false, rarity: 0.07, zone: 2, zoneName: "Lago Mafalda" },
+    { name: "Nokia 1100", value: 1100, isCollectible: true, rarity: 0.07, zone: 2, zoneName: "Lago Mafalda" },
+    { name: "Motorola", value: 2009, isCollectible: true, rarity: 0.06, zone: 2, zoneName: "Lago Mafalda" },
+    { name: "Casco normando", value: 1500, isCollectible: true, rarity: 0.04, zone: 2, zoneName: "Lago Mafalda" },
 
     // Zone 3
-    { name: "iPhone 7", value: 5090, isCollectible: true, rarity: 0.05, zone: 3 },
-    { name: "Reloj de plata", value: 8500, isCollectible: false, rarity: 0.03, zone: 3 },
-    { name: "Anillo de compromiso", value: 3000, isCollectible: false, rarity: 0.025, zone: 3 },
-    { name: "Daga ceremonial", value: 2000, isCollectible: true, rarity: 0.035, zone: 3 },
+    { name: "iPhone 7", value: 5090, isCollectible: true, rarity: 0.05, zone: 3, zoneName: "Mar Diogenes" },
+    { name: "Reloj de plata", value: 8500, isCollectible: false, rarity: 0.03, zone: 3, zoneName: "Mar Diogenes" },
+    { name: "Anillo de compromiso", value: 3000, isCollectible: false, rarity: 0.025, zone: 3, zoneName: "Mar Diogenes" },
+    { name: "Daga ceremonial", value: 2000, isCollectible: true, rarity: 0.035, zone: 3, zoneName: "Mar Diogenes" },
 
     // Zone 4
-    { name: "Perla", value: 10000, isCollectible: false, rarity: 0.1, zone: 4 },
-    { name: "Reloj de oro", value: 15000, isCollectible: false, rarity: 0.02, zone: 4 },
-    { name: "Collar de oro", value: 17500, isCollectible: false, rarity: 0.015, zone: 4 },
-    { name: "Cáliz de plata", value: 4000, isCollectible: false, rarity: 0.02, zone: 4 },
+    { name: "Perla", value: 10000, isCollectible: false, rarity: 0.1, zone: 4, zoneName: "Mar Profundo de Boogie el aceitoso" },
+    { name: "Reloj de oro", value: 15000, isCollectible: false, rarity: 0.02, zone: 4, zoneName: "Mar Profundo de Boogie el aceitoso" },
+    { name: "Collar de oro", value: 17500, isCollectible: false, rarity: 0.015, zone: 4, zoneName: "Mar Profundo de Boogie el aceitoso" },
+    { name: "Cáliz de plata", value: 4000, isCollectible: false, rarity: 0.02, zone: 4, zoneName: "Mar Profundo de Boogie el aceitoso" },
 
     // Zone 5
-    { name: "Corona de oro", value: 40000, isCollectible: false, rarity: 0.005, zone: 5 },
-    { name: "Moneda de oro antigua", value: 51500, isCollectible: false, rarity: 0.05, zone: 5 },
-    { name: "Esmeralda", value: 7500, isCollectible: false, rarity: 0.015, zone: 5 },
-    { name: "Lingote de plata", value: 6000, isCollectible: false, rarity: 0.01, zone: 5 },
+    { name: "Corona de oro", value: 40000, isCollectible: false, rarity: 0.005, zone: 5, zoneName: "Laguna Tía Vicenta" },
+    { name: "Moneda de oro antigua", value: 51500, isCollectible: false, rarity: 0.05, zone: 5, zoneName: "Laguna Tía Vicenta" },
+    { name: "Esmeralda", value: 7500, isCollectible: false, rarity: 0.015, zone: 5, zoneName: "Laguna Tía Vicenta" },
+    { name: "Lingote de plata", value: 6000, isCollectible: false, rarity: 0.01, zone: 5, zoneName: "Laguna Tía Vicenta" },
 
     // Zone 6
-    { name: "Diamante", value: 190000, isCollectible: false, rarity: 0.01, zone: 6 },
-    { name: "Rubí", value: 65000, isCollectible: false, rarity: 0.018, zone: 6 },
-    { name: "Zafiro", value: 55500, isCollectible: false, rarity: 0.019, zone: 6 },
-    { name: "Lingote de oro", value: 15000, isCollectible: false, rarity: 0.008, zone: 6 },
-    { name: "Estatuilla de jade", value: 55000, isCollectible: true, rarity: 0.02, zone: 6 },
-    { name: "Máscara de oro inca", value: 15000, isCollectible: true, rarity: 0.007, zone: 6 },
-    { name: "Sarcófago egipcio en miniatura", value: 10000, isCollectible: true, rarity: 0.01, zone: 6 },
-    { name: "Jarrón griego antiguo", value: 58000, isCollectible: true, rarity: 0.012, zone: 6 },
+    { name: "Diamante", value: 190000, isCollectible: false, rarity: 0.01, zone: 6, zoneName: "Laguna Patoruzú" },
+    { name: "Rubí", value: 65000, isCollectible: false, rarity: 0.018, zone: 6, zoneName: "Laguna Patoruzú" },
+    { name: "Zafiro", value: 55500, isCollectible: false, rarity: 0.019, zone: 6, zoneName: "Laguna Patoruzú" },
+    { name: "Lingote de oro", value: 15000, isCollectible: false, rarity: 0.008, zone: 6, zoneName: "Laguna Patoruzú" },
+    { name: "Estatuilla de jade", value: 55000, isCollectible: true, rarity: 0.02, zone: 6, zoneName: "Laguna Patoruzú" },
+    { name: "Máscara de oro inca", value: 15000, isCollectible: true, rarity: 0.007, zone: 6, zoneName: "Laguna Patoruzú" },
+    { name: "Sarcófago egipcio en miniatura", value: 10000, isCollectible: true, rarity: 0.01, zone: 6, zoneName: "Laguna Patoruzú" },
+    { name: "Jarrón griego antiguo", value: 58000, isCollectible: true, rarity: 0.012, zone: 6, zoneName: "Laguna Patoruzú" },
     ],
 };
 

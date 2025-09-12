@@ -8,6 +8,7 @@
           <div v-for="treasure in allTreasuresWithStatus" :key="treasure.name" class="treasure-card">
             <h3>{{ treasure.name }}</h3>
             <p>Valor: {{ treasure.value > 0 ? treasure.value : 'Coleccionable' }}</p>
+            <p>Zona: {{ treasure.zoneName }}</p>
             <div class="treasure-status">
               <span v-if="treasure.found" class="found-indicator">✓ Encontrado</span>
               <span v-else class="not-found-indicator">✗ No Encontrado</span>

@@ -22,18 +22,18 @@
     <img src="/src/img/muelle.svg" alt="Muelle" class="muelle-img" />
 
     <div id="deep-fish-button-container">
-      <button class="btn-icon" @click="startDeepFishing">⚓<span class="btn-label">Pesca Profunda</span></button>
-      <button class="btn-icon" @click="useConsumable('coffee')" :disabled="consumableInventory.coffee === 0">☕<span class="btn-label">Café ({{ consumableInventory.coffee }})</span></button>
-      <button class="btn-icon" @click="useConsumable('energyDrink')" :disabled="consumableInventory.energyDrink === 0">🥤<span class="btn-label">Energizante ({{ consumableInventory.energyDrink }})</span></button>
+      <button class="btn-icon" @click="startDeepFishing">⚓<span class="btn-label"></span></button>
+      <button class="btn-icon" @click="useConsumable('coffee')" :disabled="consumableInventory.coffee === 0">☕<span class="btn-label"> ({{ consumableInventory.coffee }})</span></button>
+      <button class="btn-icon" @click="useConsumable('energyDrink')" :disabled="consumableInventory.energyDrink === 0">🥤<span class="btn-label"> ({{ consumableInventory.energyDrink }})</span></button>
     </div>
 
     <MessageConsole />
     <div id="bottom-bar">
-        <button class="btn-icon" @click="goToSleep" :disabled="!canSleep">🛏️<span class="btn-label">Descansar</span><span class="btn-text">(${{ sleepCost }})</span></button>
-        <button class="btn-icon" @click="toggleModal('recycle')">♻️<span class="btn-label">Reciclar</span></button>
-        <button class="btn-icon" @click="toggleModal('market')">🛒<span class="btn-label">Mercado</span></button>
-        <button class="btn-icon" @click="openMap">🗺️<span class="btn-label">Mapa</span></button>
-        <button class="btn-icon" @click="toggleModal('settings')">⚙️<span class="btn-label">Ajustes</span></button>
+        <button class="btn-icon" @click="goToSleep" :disabled="!canSleep">🛏️<span class="btn-label"></span><span class="btn-text">(${{ sleepCost }})</span></button>
+        <button class="btn-icon" @click="toggleModal('recycle')">♻️<span class="btn-label"></span></button>
+        <button class="btn-icon" @click="toggleModal('market')">🛒<span class="btn-label"></span></button>
+        <button class="btn-icon" @click="openMap">🗺️<span class="btn-label"></span></button>
+        <button class="btn-icon" @click="toggleModal('settings')">⚙️<span class="btn-label"></span></button>
     </div>
 
     <!-- Mobile controls will go here -->
