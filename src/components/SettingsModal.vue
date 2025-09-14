@@ -6,6 +6,7 @@
       <div class="settings-buttons">
         <button class="settings-btn" @click="openModal('instructions')">Instrucciones</button>
         <button class="settings-btn" @click="openModal('stats')">Estadísticas</button>
+        <button class="settings-btn" @click="showSpecialEvents = !showSpecialEvents">Eventos Especiales</button>
         <button class="btn-restart" @click="restartGame">Reiniciar Juego</button>
         <button class="btn-credits" @click="openModal('credits')">Créditos</button>
         <button class="btn-github" @click="openGithub">GitHub</button>
@@ -13,19 +14,33 @@
           <i :class="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
         </button>
       </div>
+      <transition name="fade">
+        <div class="special-events" v-if="showSpecialEvents">
+          <h3>Eventos Especiales</h3>
+          <div class="event-cards">
+            <div class="event-card" v-for="event in specialEvents" :key="event.type">
+              <i :class="getEventIcon(event.type)"></i>
+              <p><strong>{{ event.type.replace(/_/g, ' ') }}</strong></p>
+              <p>{{ event.message }}</p>
+            </div>
+          </div>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
 
 <script>
 import { useStore } from 'vuex';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 export default {
   name: 'SettingsModal',
   setup() {
     const store = useStore();
     const show = computed(() => store.state.modals.settings);
+    const specialEvents = computed(() => store.state.specialEvents);
+    const showSpecialEvents = ref(false);
     const close = () => store.dispatch('toggleModal', 'settings');
 
     const openModal = (modal) => {
@@ -47,6 +62,33 @@ export default {
     const isMuted = computed(() => store.state.musicMuted);
     const toggleMusic = () => store.dispatch('toggleMusic');
 
+    const getEventIcon = (type) => {
+      switch (type) {
+        case 'storm':
+          return 'fas fa-bolt';
+        case 'treasure_hunt':
+          return 'fas fa-gem';
+        case 'golden_fish_festival':
+          return 'fas fa-fish';
+        case 'night_of_the_sharks':
+          return 'fas fa-fish';
+        case 'meteor_shower':
+          return 'fas fa-meteor';
+        case 'trash_cleanup_day':
+          return 'fas fa-recycle';
+        case 'exotic_fish_migration':
+          return 'fas fa-fish';
+        case 'fishermans_holiday':
+          return 'fas fa-umbrella-beach';
+        case 'low_tide':
+          return 'fas fa-water';
+        case 'high_tide':
+          return 'fas fa-water';
+        default:
+          return 'fas fa-star';
+      }
+    };
+
     return {
       show,
       close,
@@ -55,6 +97,9 @@ export default {
       openGithub,
       isMuted,
       toggleMusic,
+      specialEvents,
+      showSpecialEvents,
+      getEventIcon,
     };
   },
 };
@@ -179,11 +224,74 @@ h2 {
   background-color: #333333;
 }
 
+.special-events {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.special-events h3 {
+  color: #ffd700;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.event-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.event-cards::-webkit-scrollbar {
+  width: 8px;
+}
+
+.event-cards::-webkit-scrollbar-track {
+  background: #222;
+}
+
+.event-cards::-webkit-scrollbar-thumb {
+  background: #ffd700;
+  border-radius: 4px;
+}
+
+.event-cards::-webkit-scrollbar-thumb:hover {
+  background: #e6c300;
+}
+
+.event-card {
+  background-color: #333;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-5px);
+}
+
+.event-card i {
+  font-size: 2em;
+  margin-bottom: 10px;
+  color: #ffd700;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
+
 @media (max-width: 768px) {
   .modal-content {
     width: 95%;
     padding: 15px;
     max-height: 90vh;
+    overflow-y: auto;
   }
 
   h2 {

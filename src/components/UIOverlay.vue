@@ -250,7 +250,7 @@ export default {
 
 #deep-fish-button-container {
   position: fixed;
-  top: 110px; /* Adjusted top position */
+  top: 150px; /* Adjusted top position */
   right: 10px;
   z-index: 100;
   display: flex;
@@ -260,7 +260,7 @@ export default {
 
 #consumable-buttons {
   position: fixed;
-  top: 110px; /* Adjusted top position */
+  top: 150px; /* Adjusted top position */
   left: 10px;
   z-index: 100;
   display: flex;
@@ -286,16 +286,22 @@ export default {
     background-color: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    font-size: 1.8em;
+    font-size: 1.5em;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     transition: all 0.2s ease-in-out;
-    flex-grow: 1;
-    padding: 5px 0;
+    width: 60px;
+    height: 60px;
+}
+
+#bottom-bar .btn-icon {
+    font-size: 1.5em;
+    width: 60px;
+    height: 60px;
 }
 
 .btn-icon:active {
@@ -315,7 +321,7 @@ export default {
 
 .event-tag {
   position: fixed;
-  bottom: 85px; /* Above the bottom bar */
+  top: 150px; /* Adjusted top position */
   right: 20px;
   background-color: yellow;
   color: black;

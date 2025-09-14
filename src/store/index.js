@@ -48,6 +48,27 @@ const initialState = {
     fishFightActive: false,
     currentEvent: null,
     eventActive: false,
+    gameWon: false,
+    secretCombination: {
+        fished: false,
+        recycled: false,
+        sold: false,
+        slept: false,
+    },
+    specialEvents: [
+        { type: 'storm', effect: 'double_rewards', message: '¡Una tormenta ha llegado! ¡Las recompensas se duplican hoy!' },
+        { type: 'storm', effect: 'halve_rewards', message: '¡Una tormenta ha llegado! ¡Las recompensas se reducen a la mitad hoy!' },
+        { type: 'storm', effect: 'salmon_and_plastic', message: '¡Una extraña tormenta! Hoy solo pican salmones y bolsas de plástico.' },
+        { type: 'treasure_hunt', effect: 'treasures_only', message: '¡Día de búsqueda de tesoros! Hoy solo encontrarás tesoros.' },
+        { type: 'golden_fish_festival', effect: 'golden_fish_festival', message: '¡Festival del Pez Dorado! Hoy hay más oportunidades de pescar peces dorados.' },
+        { type: 'night_of_the_sharks', effect: 'night_of_the_sharks', message: '¡Noche de los Tiburones! Hoy solo se pueden pescar tiburones durante la noche.' },
+        { type: 'meteor_shower', effect: 'meteor_shower', message: '¡Lluvia de Meteoritos! Hoy se pueden encontrar gemas raras y rocas espaciales.' },
+        { type: 'trash_cleanup_day', effect: 'trash_cleanup_day', message: '¡Día de Limpieza! Hoy se paga más por la basura reciclada.' },
+        { type: 'exotic_fish_migration', effect: 'exotic_fish_migration', message: '¡Migración de Peces Exóticos! Hoy hay más oportunidades de pescar peces exóticos.' },
+        { type: 'fishermans_holiday', effect: 'fishermans_holiday', message: '¡Feriado del Pescador! Hoy pescar no consume energía.' },
+        { type: 'low_tide', effect: 'low_tide', message: '¡Marea Baja! Hoy solo se puede pescar basura.' },
+        { type: 'high_tide', effect: 'high_tide', message: '¡Marea Alta! Hoy solo se pueden pescar peces exóticos.' },
+    ],
     modals: {
     market: false,
     stats: false,
@@ -59,6 +80,7 @@ const initialState = {
     settings: false,
     map: false,
     credits: false,
+    win: false,
     },
     musicMuted: false,
     currentZone: 1,
@@ -308,7 +330,11 @@ const store = createStore({
                     finalAmount *= 0.5;
                 }
             }
+            if (state.eventActive && state.currentEvent.effect === 'trash_cleanup_day') {
+                finalAmount *= 1.5;
+            }
             state.money += finalAmount; 
+            this.dispatch('checkWinConditions');
         },
         spendMoney(state, amount) { state.money -= amount; },
         addEnergy(state, amount) {
@@ -355,7 +381,10 @@ const store = createStore({
         },
         incrementTrashCount(state) { state.trashCount++; },
         incrementTreasuresCount(state) { state.treasuresCount++; },
-        addCaughtTreasure(state, treasure) { state.caughtTreasuresInventory.push(treasure); },
+        addCaughtTreasure(state, treasure) { 
+            state.caughtTreasuresInventory.push(treasure); 
+            this.dispatch('checkWinConditions');
+        },
         resetFishCaughtSinceSleep(state) { state.fishCaughtSinceSleep = 0; },
         updateFishingStats(state, { fish, value }) {
             if (!state.fishingStats.fishByType[fish.name]) {
@@ -402,6 +431,7 @@ const store = createStore({
             goal.completed = true;
             state.completedGoals.push(goal);
             state.currentGoals.splice(index, 1); // Remove from current goals
+            this.dispatch('checkWinConditions');
         }
         },
         setFishFighting(state, value) {
@@ -453,6 +483,9 @@ const store = createStore({
         setEvent(state, event) {
             state.currentEvent = event;
             state.eventActive = !!event;
+        },
+        setGameWon(state, value) {
+            state.gameWon = value;
         },
     },
     actions: {
@@ -578,9 +611,14 @@ const store = createStore({
         },
         startFishing({ commit, state, dispatch }) { // Added dispatch here
         if (state.isFishing || state.energy < 10) return;
+        dispatch('checkSecretCombination', 'fish');
         commit('setIsFishing', true);
         commit('setFishingDepth', 'normal');
-        commit('setEnergy', state.energy - 10);
+        if (state.eventActive && state.currentEvent.effect === 'fishermans_holiday') {
+            commit('setEnergy', state.energy);
+        } else {
+            commit('setEnergy', state.energy - 10);
+        }
         commit('addMessage', { text: 'Lanzando la caña... ¡A ver qué pica!', type: 'system' });
 
         // Event: Salmon and Plastic
@@ -643,6 +681,98 @@ const store = createStore({
                 commit('setIsFishing', false);
                 commit('setFishingDepth', null);
             }, 1000);
+            return;
+        }
+        // Event: Golden Fish Festival
+        if (state.eventActive && state.currentEvent.effect === 'golden_fish_festival') {
+            // Increase chance of catching golden fish
+            const originalCatchRate = state.fishingRods[state.currentRod].catchRate;
+            state.fishingRods[state.currentRod].catchRate *= 1.5; // 50% bonus
+            setTimeout(() => {
+                state.fishingRods[state.currentRod].catchRate = originalCatchRate; // Reset catch rate
+            }, 2000);
+        }
+
+        // Event: Night of the Sharks
+        if (state.eventActive && state.currentEvent.effect === 'night_of_the_sharks' && state.isNight) {
+            const shark = state.fishTypes.find(f => f.name === 'Tiburón');
+            const value = Math.floor(shark.value * 1.5);
+            commit('addMessage', { text: `¡Un Tiburón ha picado!`, type: 'catch' });
+            commit('updateFishingStats', { fish: shark, value });
+            commit('addCaughtFish', { ...shark, value });
+            commit('incrementExoticFishCount');
+            commit('updateGoalProgress', { type: 'catchExoticFish', amount: 1 });
+            commit('addMoney', value);
+            commit('setIsFishing', false);
+            commit('setFishingDepth', null);
+            return;
+        }
+
+        // Event: Meteor Shower
+        if (state.eventActive && state.currentEvent.effect === 'meteor_shower') {
+            const gems = [
+                { name: "Rubí", value: 65000, isCollectible: false, rarity: 0.018, zone: 6, zoneName: "Laguna Patoruzú" },
+                { name: "Zafiro", value: 55500, isCollectible: false, rarity: 0.019, zone: 6, zoneName: "Laguna Patoruzú" },
+                { name: "Diamante", value: 190000, isCollectible: false, rarity: 0.01, zone: 6, zoneName: "Laguna Patoruzú" },
+            ];
+            const randomGem = gems[Math.floor(Math.random() * gems.length)];
+            commit('addMessage', { text: `¡Has encontrado una gema: ${randomGem.name}!`, type: 'achievement' });
+            commit('addCaughtTreasure', randomGem);
+            commit('incrementTreasuresCount');
+            commit('addMoney', randomGem.value);
+            commit('updateGoalProgress', { type: 'findTreasure', amount: 1 });
+            commit('updateSpecificGoal', { type: 'findSpecificTreasure', name: randomGem.name });
+            commit('updateUniqueTreasureGoal');
+            commit('setIsFishing', false);
+            commit('setFishingDepth', null);
+            return;
+        }
+
+        // Event: Exotic Fish Migration
+        if (state.eventActive && state.currentEvent.effect === 'exotic_fish_migration') {
+            const exoticFish = state.fishTypes.filter(f => f.isExotic);
+            const randomExoticFish = exoticFish[Math.floor(Math.random() * exoticFish.length)];
+            const value = Math.floor(randomExoticFish.value * (state.isNight ? 1.5 : 1));
+            commit('addMessage', { text: `¡Un pez exótico ha picado: ${randomExoticFish.name}!`, type: 'catch' });
+            commit('updateFishingStats', { fish: randomExoticFish, value });
+            commit('addCaughtFish', { ...randomExoticFish, value });
+            commit('incrementExoticFishCount');
+            commit('updateGoalProgress', { type: 'catchExoticFish', amount: 1 });
+            commit('addMoney', value);
+            commit('setIsFishing', false);
+            commit('setFishingDepth', null);
+            return;
+        }
+
+        // Event: Low Tide
+        if (state.eventActive && state.currentEvent.effect === 'low_tide') {
+            const trashItem = state.trashTypes[Math.floor(Math.random() * state.trashTypes.length)];
+            if (trashItem.consumable) {
+                commit('addConsumable', { consumable: trashItem.consumable.name, quantity: 1 });
+                commit('addMessage', { text: `¡Vaya! Encontraste ${trashItem.name}.`, type: 'catch' });
+            } else {
+                commit('addCaughtTrash', trashItem);
+                commit('incrementTrashCount');
+                commit('addMessage', { text: `¡Oh, no! Has pescado ${trashItem.name}.`, type: 'catch' });
+            }
+            commit('setIsFishing', false);
+            commit('setFishingDepth', null);
+            return;
+        }
+
+        // Event: High Tide
+        if (state.eventActive && state.currentEvent.effect === 'high_tide') {
+            const exoticFish = state.fishTypes.filter(f => f.isExotic);
+            const randomExoticFish = exoticFish[Math.floor(Math.random() * exoticFish.length)];
+            const value = Math.floor(randomExoticFish.value * (state.isNight ? 1.5 : 1));
+            commit('addMessage', { text: `¡Un pez exótico ha picado: ${randomExoticFish.name}!`, type: 'catch' });
+            commit('updateFishingStats', { fish: randomExoticFish, value });
+            commit('addCaughtFish', { ...randomExoticFish, value });
+            commit('incrementExoticFishCount');
+            commit('updateGoalProgress', { type: 'catchExoticFish', amount: 1 });
+            commit('addMoney', value);
+            commit('setIsFishing', false);
+            commit('setFishingDepth', null);
             return;
         }
 
@@ -777,8 +907,8 @@ const store = createStore({
         }
 
         setTimeout(() => {
-            // Special deep fishing event (1 in 15 chance)
-            if (Math.random() < 1 / 15) {
+            // Special deep fishing event (1 in 10 chance)
+            if (Math.random() < 1 / 10) {
                 const availableFish = state.fishTypes.filter(fish => {
                     const meetsRequirements = !fish.requirements || (state.currentBoat >= fish.requirements.boat && state.currentRod >= fish.requirements.rod);
                     const availableAtTime = fish.partOfDay.includes(state.currentPartOfDay);
@@ -805,7 +935,7 @@ const store = createStore({
                         commit('setFishFighting', true);
                         commit('setFishFightProgress', 0);
                         
-                        const requiredTaps = 12;
+                        const requiredTaps = 8;
                         const timeToCatch = 2; // seconds
 
                         commit('setFishFightRequiredTaps', requiredTaps);
@@ -947,6 +1077,26 @@ const store = createStore({
                     commit('updateGoalProgress', { type: 'catchCommonFish', amount: 1 });
                 }
                 commit('addMoney', value);
+
+                // Extra reward
+                if (Math.random() < 0.25) {
+                    const availableTreasures = state.treasureTypes;
+                    const treasureToCatch = availableTreasures[Math.floor(Math.random() * availableTreasures.length)];
+                    commit('addMessage', { text: `¡Además encontraste un tesoro: ${treasureToCatch.name}!`, type: 'achievement' });
+                    commit('addCaughtTreasure', treasureToCatch);
+                    commit('incrementTreasuresCount');
+                    if (treasureToCatch.value > 0) {
+                        commit('addMoney', treasureToCatch.value);
+                    }
+                    commit('updateGoalProgress', { type: 'findTreasure', amount: 1 });
+                    commit('updateSpecificGoal', { type: 'findSpecificTreasure', name: treasureToCatch.name });
+                    commit('updateUniqueTreasureGoal');
+                } else {
+                    const extraMoney = Math.floor(Math.random() * 4001) + 1000;
+                    commit('addMessage', { text: `¡Además encontraste ${extraMoney} de dinero extra!`, type: 'achievement' });
+                    commit('addMoney', extraMoney);
+                }
+
             } else {
                 commit('addMessage', { text: `¡El ${state.fishToCatch.name} se ha escapado!`, type: 'warning' });
             }
@@ -956,6 +1106,7 @@ const store = createStore({
             commit('setFishingDepth', null);
         },
         sellAllFish({ commit, state, dispatch }) {
+        dispatch('checkSecretCombination', 'sell');
         if (state.caughtFishInventory.length === 0) {
             commit('addMessage', { text: 'No tienes ningún pez para vender. ¡A pescar!', type: 'warning' });
             return;
@@ -1043,6 +1194,7 @@ const store = createStore({
             commit('updateGoalProgress', { type: 'recycleItems', amount: 1 });
         },
         recycleAllTrash({ commit, state, dispatch }) {
+            dispatch('checkSecretCombination', 'recycle');
             const totalValue = state.caughtTrashInventory.reduce((sum, item) => sum + item.recycleValue, 0);
             if (totalValue > 0) {
                 const itemCount = state.caughtTrashInventory.length;
@@ -1054,6 +1206,7 @@ const store = createStore({
             }
         },
         goToSleep({ commit, dispatch, state }) {
+            dispatch('checkSecretCombination', 'sleep');
             const sleepCost = 1400 + state.currentDay * 100;
 
             if (state.money >= sleepCost) {
@@ -1098,14 +1251,49 @@ const store = createStore({
         toggleMusic({ commit }) {
             commit('toggleMusic');
         },
-        triggerRandomEvent({ commit }) {
-            const events = [
-                { type: 'storm', effect: 'double_rewards', message: '¡Una tormenta ha llegado! ¡Las recompensas se duplican hoy!' },
-                { type: 'storm', effect: 'halve_rewards', message: '¡Una tormenta ha llegado! ¡Las recompensas se reducen a la mitad hoy!' },
-                { type: 'storm', effect: 'salmon_and_plastic', message: '¡Una extraña tormenta! Hoy solo pican salmones y bolsas de plástico.' },
-                { type: 'treasure_hunt', effect: 'treasures_only', message: '¡Día de búsqueda de tesoros! Hoy solo encontrarás tesoros.' }
-            ];
-            const randomEvent = events[Math.floor(Math.random() * events.length)];
+        checkWinConditions({ commit, state }) {
+            // Win condition 1: Money
+            if (state.money >= 50000000) {
+                commit('setGameWon', true);
+                commit('toggleModal', 'win');
+            }
+
+            // Win condition 2: All treasures and goals
+            const allTreasures = state.treasureTypes.length;
+            const allGoals = Object.keys(state.goalDefinitions).length;
+            if (state.caughtTreasuresInventory.length >= allTreasures && state.completedGoals.length >= allGoals) {
+                commit('setGameWon', true);
+                commit('toggleModal', 'win');
+            }
+        },
+        checkSecretCombination({ commit, state }, action) {
+            if (state.currentBoat === 4 && state.currentRod === 0 && state.currentZone === 5) {
+                if (action === 'fish') {
+                    state.secretCombination.fished = true;
+                }
+                if (action === 'recycle' && state.secretCombination.fished) {
+                    state.secretCombination.recycled = true;
+                }
+                if (action === 'sell' && state.secretCombination.recycled) {
+                    state.secretCombination.sold = true;
+                }
+                if (action === 'sleep' && state.secretCombination.sold) {
+                    state.secretCombination.slept = true;
+                }
+
+                if (state.secretCombination.fished && state.secretCombination.recycled && state.secretCombination.sold && state.secretCombination.slept) {
+                    commit('setGameWon', true);
+                    commit('toggleModal', 'win');
+                }
+            } else {
+                state.secretCombination.fished = false;
+                state.secretCombination.recycled = false;
+                state.secretCombination.sold = false;
+                state.secretCombination.slept = false;
+            }
+        },
+        triggerRandomEvent({ commit, state }) {
+            const randomEvent = state.specialEvents[Math.floor(Math.random() * state.specialEvents.length)];
             commit('setEvent', randomEvent);
             commit('addMessage', { text: randomEvent.message, type: 'event' });
         },
@@ -1146,7 +1334,8 @@ const store = createStore({
         getFishingDepth: (state) => state.fishingDepth,
         getFishFighting: (state) => state.fishFighting,
         getFishToCatch: (state) => state.fishToCatch,
-        getConsumableInventory: (state) => state.consumableInventory
+        getConsumableInventory: (state) => state.consumableInventory,
+        getSpecialEvents: (state) => state.specialEvents
     }
 });
 

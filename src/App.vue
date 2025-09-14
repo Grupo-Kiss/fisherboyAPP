@@ -2,6 +2,7 @@
   <div id="app">
     <GameContainer />
     <MusicPlayer />
+    <WinModal />
   </div>
 </template>
 
@@ -10,12 +11,14 @@ import { onMounted } from 'vue';
 import { useStore } from 'vuex';
 import GameContainer from './components/GameContainer.vue';
 import MusicPlayer from './components/MusicPlayer.vue';
+import WinModal from './components/WinModal.vue';
 
 export default {
   name: 'App',
   components: {
     GameContainer,
     MusicPlayer,
+    WinModal,
   },
   setup() {
     const store = useStore();

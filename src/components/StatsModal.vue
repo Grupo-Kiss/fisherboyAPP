@@ -3,6 +3,11 @@
     <div class="modal-content">
       <span class="close" @click="close">&times;</span>
       <h2>Estadísticas de Pesca</h2>
+      <div class="shareable-stats" v-if="gameWon">
+        <h3>¡Mis Estadísticas de Fisherboy!</h3>
+        <textarea readonly :value="shareableStats"></textarea>
+        <button @click="copyStats">Copiar al Portapapeles</button>
+      </div>
       <div class="stats-summary">
         <div>Peces totales atrapados: {{ fishingStats.totalCaught }}</div>
         <div>Valor total ganado: ${{ fishingStats.totalValue }}</div>
@@ -37,12 +42,37 @@ export default {
 
     const fishingStats = computed(() => store.getters.getFishingStats);
     const recycledObjects = computed(() => store.getters.getRecycledObjects);
+    const gameWon = computed(() => store.state.gameWon);
+
+    const shareableStats = computed(() => {
+      const stats = store.getters.getFishingStats;
+      const money = store.getters.getMoney;
+      const treasures = store.getters.getTreasuresCount;
+      const goals = store.getters.getGoals.completed.length;
+      const exoticFish = store.getters.getExoticFishCount;
+      const commonFish = store.getters.getCommonFishCount;
+      const gameTime = store.getters.getGameTime;
+      return `Peces comunes - ${commonFish} / Dinero ${money} / Tesoros encontrados ${treasures} / Objetivos conseguidos ${goals} / Peces exóticos - ${exoticFish} - Tiempo de juego ${Math.round(gameTime / 60)} minutos`;
+    });
+
+    const copyStats = () => {
+      const el = document.createElement('textarea');
+      el.value = shareableStats.value;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      store.dispatch('addMessage', { text: '¡Estadísticas copiadas al portapapeles!', type: 'system' });
+    };
 
     return {
       show,
       close,
       fishingStats,
       recycledObjects,
+      gameWon,
+      shareableStats,
+      copyStats,
     };
   },
 };
@@ -136,6 +166,36 @@ h3 {
 
 .fish-stat-count {
   margin-bottom: 5px;
+}
+
+.shareable-stats {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.shareable-stats textarea {
+  width: 100%;
+  background-color: #333;
+  color: white;
+  border: 1px solid #444;
+  border-radius: 5px;
+  padding: 10px;
+  resize: none;
+}
+
+.shareable-stats button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+.shareable-stats button:hover {
+  background-color: #45a049;
 }
 
 @media (max-width: 768px) {
