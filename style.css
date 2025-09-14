@@ -1,11 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
 /* General Styles */
 body {
     margin: 0;
     padding: 0;
     background: linear-gradient(180deg, #87CEEB 0%, #1E90FF 100%);
-    font-family: "Press Start 2P", cursive;
+    font-family: 'Poppins', sans-serif;
     overflow: hidden;
     transition: background 5s;
 }
@@ -16,7 +16,7 @@ body {
     padding: 12px 24px;
     border-radius: 8px;
     cursor: pointer;
-    font-family: "Press Start 2P", cursive;
+    font-family: 'Poppins', sans-serif;
     font-weight: 600;
     text-transform: uppercase;
     transition: all 0.3s ease;
@@ -69,9 +69,9 @@ body {
 /* UI Top Bar */
 #ui-top-bar {
     position: fixed;
-    top: 10px;
-    left: 160px;
-    right: 10px;
+    top: 0px;
+    left: 0px;
+    right: 0px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -82,7 +82,7 @@ body {
 .game-info-panel {
     background: rgba(0, 0, 0, 0.6);
     padding: 4x 4px;
-    border-radius: 10px;
+    border-radius: 0px;
     font-size: 1.2em;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
@@ -208,12 +208,20 @@ body {
 #fishingLine {
     position: absolute;
     width: 2px;
-    height: 120px;
+    height: 0;
     background-color: #fff;
     top: 60px;
     left: 110px;
     transform-origin: top;
     transition: height 0.3s;
+}
+
+#fishingLine.normal {
+    height: 120px;
+}
+
+#fishingLine.deep {
+    height: 400px;
 }
 
 /* Fish */
@@ -223,6 +231,8 @@ body {
     align-items: center;
     opacity: 0.6;
     z-index: 0;
+    width: 25px;
+    height: 25px;
 }
 
 .fish.exotic {
@@ -231,19 +241,24 @@ body {
 }
 
 .fish.size-small {
-    transform: scale(0.8);
+    width: 20px;
+    height: 20px;
 }
 .fish.size-medium {
-    transform: scale(1.1);
+    width: 35px;
+    height: 35px;
 }
 .fish.size-large {
-    transform: scale(1.5);
+    width: 50px;
+    height: 50px;
 }
 
 @keyframes fishSwim {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-    100% { transform: translateY(0); }
+    0% { transform: translateY(0) rotate(0); }
+    25% { transform: translateY(-3px) rotate(-5deg); }
+    50% { transform: translateY(0px) rotate(0); }
+    75% { transform: translateY(3px) rotate(5deg); }
+    100% { transform: translateY(0) rotate(0); }
 }
 
 .fish.swimming-right {
@@ -278,12 +293,11 @@ body {
 }
 
 .modal-content {
-    background-color: rgba(0, 0, 0, 0.85);
-    padding: 20px;
+    background-color: #222222;
+    padding: 30px;
     width: 80%;
     max-width: 700px;
-    border-radius: 10px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
     color: white;
     position: relative;
     box-shadow: 0 10px 20px rgba(0,0,0,0.2);
@@ -339,9 +353,9 @@ body.night {
     #ui-top-bar {
         flex-direction: column;
         align-items: flex-start;
-        left: 10px;
-        top: 10px;
-        right: 10px;
+        left: 0px;
+        top: 0px;
+        right: 0px;
         width: auto;
     }
 
@@ -402,8 +416,7 @@ body.night {
     }
 
     .modal-content {
-        width: 95vw;
-        height: 80vh;
+        width: 90%;
         max-width: none;
         padding: 15px;
     }
@@ -418,5 +431,32 @@ body.night {
 
     .instructions-columns {
         grid-template-columns: 1fr;
+    }
+}
+
+.fish.has-bubbles::after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    animation: bubbles 2s linear infinite;
+    bottom: 0;
+    right: 0;
+}
+
+@keyframes bubbles {
+    0% {
+        transform: translateY(0) scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(-20px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-40px) scale(0);
+        opacity: 0;
     }
 }
