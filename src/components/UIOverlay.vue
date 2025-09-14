@@ -1,23 +1,20 @@
 <template>
   <div id="ui-overlay">
     <div id="top-left-panel">
-      <div class="stats-line">
         <div class="stat-item">💰 {{ getMoney }}</div>
         <div class="stat-item">🐟 {{ getCommonFishCount }}</div>
         <div class="stat-item">✨ {{ getExoticFishCount }}</div>
         <div class="stat-item">🗑️ {{ getTrashCount }}</div>
         <div class="stat-item">💎 {{ getTreasuresCount }}</div>
-      </div>
-      <div class="stats-line">
-        <div class="stat-item">{{ currentZoneName }}</div>
         <div class="stat-item">{{ formattedTime }}</div>
         <div class="stat-item">{{ seasonIcon }}</div>
         <div class="stat-item">{{ temperature }}°C</div>
+        <div class="stat-item">📍 {{ currentZoneName }}</div>
+        <div class="stat-item">🎣 {{ currentRodName }}</div>
+        <div class="stat-item">🚤 {{ currentBoatName }}</div>
+      <div id="energy-bar-container" :class="energyColorClass">
+        <div id="energy-fill" :style="{ width: getEnergy + '%' }"></div>
       </div>
-    </div>
-
-    <div id="energy-bar-container" :class="energyColorClass">
-      <div id="energy-fill" :style="{ width: getEnergy + '%' }"></div>
     </div>
 
     <img src="/src/img/muelle.svg" alt="Muelle" class="muelle-img" />
@@ -35,6 +32,11 @@
     </div>
 
     <MessageConsole />
+
+    <div v-if="eventActive" class="event-tag">
+      {{ currentEvent.message }}
+    </div>
+
     <div id="bottom-bar">
         <button class="btn-icon" @click="toggleModal('market')">🛒<span class="btn-label"></span></button>
         <button class="btn-icon" @click="openMap">🗺️<span class="btn-label"></span></button>
@@ -42,14 +44,6 @@
         <button class="btn-icon" @click="toggleModal('goals')">🎯<span class="btn-label"></span></button>
         <button class="btn-icon" @click="toggleModal('settings')">⚙️<span class="btn-label"></span></button>
     </div>
-
-    <!-- Mobile controls will go here -->
-
-    <!-- Bottom bar will go here -->
-
-    <!-- Mobile controls will go here -->
-
-    <!-- Fish fight mini-game will go here -->
   </div>
 </template>
 
@@ -93,7 +87,7 @@ export default {
 
     const temperature = computed(() => store.getters.getTemperature);
 
-        const seasonIcon = computed(() => {
+    const seasonIcon = computed(() => {
       switch (store.getters.getCurrentSeason) {
         case 'spring': return '🌸';
         case 'summer': return '☀️';
@@ -101,6 +95,17 @@ export default {
         case 'winter': return '❄️';
         default: return '';
       }
+    });
+
+    const eventActive = computed(() => store.state.eventActive);
+    const currentEvent = computed(() => store.state.currentEvent);
+
+    const currentRodName = computed(() => {
+      return store.state.fishingRods[store.state.currentRod].name;
+    });
+
+    const currentBoatName = computed(() => {
+      return store.state.boats[store.state.currentBoat].name;
     });
 
     return {
@@ -147,13 +152,24 @@ export default {
       seasonIcon,
       recycleAllTrash: () => store.dispatch('recycleAllTrash'),
       sellAllFish: () => store.dispatch('sellAllFish'),
+      eventActive,
+      currentEvent,
+      currentRodName,
+      currentBoatName,
     };
   },
 };
 </script>
 
 <style scoped>
-/* CSS will go here */
+@keyframes shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
 
 #top-left-panel {
   position: fixed;
@@ -165,50 +181,54 @@ export default {
   border-radius: 0;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   z-index: 100;
-  padding: 5px 10px;
-}
-
-.stats-line {
+  padding: 5px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 2px 0;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .stat-item {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 5px 10px;
+  border-radius: 5px;
   font-size: 0.8em;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
+  flex-grow: 1;
+  text-align: center;
 }
 
 #energy-bar-container {
-  position: fixed;
-  top: 55px; /* Position below the top bar */
-  left: 0;
   width: 100%;
-  height: 10px;
-  background: rgba(0,0,0,0.6);
-  z-index: 100;
+  height: 12px; /* Slightly thicker */
+  background: rgba(0,0,0,0.8);
+  margin-top: 4px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
 }
 
 #energy-fill {
   height: 100%;
-  transition: width 0.5s, background-color 0.5s;
-  position: absolute;
-  left: 0;
+  transition: width 0.5s, background 0.5s;
+  border-radius: 6px;
+  background-size: 200% 100%;
+  animation: shine 3s linear infinite;
 }
 
 .energy-high #energy-fill {
-  background-color: #01f80a;
+  background: linear-gradient(45deg, #28a745, #218838);
 }
 
 .energy-medium #energy-fill {
-  background-color: #fc7d07;
+  background: linear-gradient(45deg, #ffc107, #e0a800);
 }
 
 .energy-low #energy-fill {
-  background-color: #ff1201;
+  background: linear-gradient(45deg, #dc3545, #c82333);
 }
 
 #current-zone {
@@ -230,7 +250,7 @@ export default {
 
 #deep-fish-button-container {
   position: fixed;
-  top: 75px;
+  top: 110px; /* Adjusted top position */
   right: 10px;
   z-index: 100;
   display: flex;
@@ -240,7 +260,7 @@ export default {
 
 #consumable-buttons {
   position: fixed;
-  top: 75px;
+  top: 110px; /* Adjusted top position */
   left: 10px;
   z-index: 100;
   display: flex;
@@ -254,27 +274,28 @@ export default {
     left: 0;
     right: 0;
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     background: rgba(0, 0, 0, 0.85);
-    padding: 10px 0;
+    padding: 5px;
     z-index: 100;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 4px;
 }
 
 .btn-icon {
-    background: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
     font-size: 1.8em;
     cursor: pointer;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     transition: all 0.2s ease-in-out;
+    flex-grow: 1;
+    padding: 5px 0;
 }
 
 .btn-icon:active {
@@ -290,5 +311,19 @@ export default {
 .btn-text {
     font-size: 0.5em;
     display: block;
+}
+
+.event-tag {
+  position: fixed;
+  bottom: 85px; /* Above the bottom bar */
+  right: 20px;
+  background-color: yellow;
+  color: black;
+  padding: 8px 15px;
+  border-radius: 15px;
+  font-size: 0.9em;
+  font-weight: bold;
+  z-index: 101;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 </style>

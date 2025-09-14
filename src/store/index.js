@@ -195,6 +195,14 @@ const initialState = {
     { name: "Contenedor de Aceite", recycleValue: 2406 },
     { name: "Bebida Energizante", recycleValue: 10, consumable: { name: 'energyDrink', energy: 20 } },
     { name: "Café", recycleValue: 5, consumable: { name: 'coffee', energy: 10 } },
+    { name: "Bebida Energizante", recycleValue: 10, consumable: { name: 'energyDrink', energy: 20 } },
+    { name: "Café", recycleValue: 5, consumable: { name: 'coffee', energy: 10 } },
+    { name: "Bebida Energizante", recycleValue: 10, consumable: { name: 'energyDrink', energy: 20 } },
+    { name: "Café", recycleValue: 5, consumable: { name: 'coffee', energy: 10 } },
+    { name: "Bebida Energizante", recycleValue: 10, consumable: { name: 'energyDrink', energy: 20 } },
+    { name: "Café", recycleValue: 5, consumable: { name: 'coffee', energy: 10 } },
+    { name: "Bebida Energizante", recycleValue: 10, consumable: { name: 'energyDrink', energy: 20 } },
+    { name: "Café", recycleValue: 5, consumable: { name: 'coffee', energy: 10 } },
     ],
     fishTypes: [
     // Zone 1: Lago Clemente
@@ -944,6 +952,8 @@ const store = createStore({
             }
             commit('setFishFighting', false);
             commit('setFishToCatch', null);
+            commit('setIsFishing', false);
+            commit('setFishingDepth', null);
         },
         sellAllFish({ commit, state, dispatch }) {
         if (state.caughtFishInventory.length === 0) {

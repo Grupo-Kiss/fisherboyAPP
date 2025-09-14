@@ -2,12 +2,19 @@
   <div id="instructionsModal" class="modal" v-if="modals.instructions">
     <div class="modal-content">
       <span id="closeInstructions" class="close" @click="hideInstructions">×</span>
-      <h2>Instrucciones</h2>
-      <p>Toca la pantalla para una pesca corta.</p>
-      <p>Mantén presionado para una pesca profunda.</p>
-      <p>Si un pez grande pica, toca repetidamente la pantalla para atraparlo.</p>
-      <p>Usa los iconos en la parte inferior para navegar por el juego.</p>
-      <p>Usa el icono de engranaje para ver las estadísticas, objetivos y tesoros.</p>
+      <h2>¡Bienvenido a Fisherboy!</h2>
+      <p>Tu aventura para convertirte en una leyenda de la pesca comienza ahora.</p>
+      <p style="font-weight: bold; margin: 15px 0;">Tu objetivo es simple: ¡conseguir el mejor equipamiento y completar todos los objetivos!</p>
+      
+      <h4>Primeros Pasos:</h4>
+      <ul style="list-style: none; padding: 0; text-align: left; max-width: 350px; margin: auto;">
+        <li style="margin-bottom: 10px;">🎣 <strong>Pesca:</strong> Haz clic en tu personaje para lanzar la caña.</li>
+        <li style="margin-bottom: 10px;">💰 <strong>Vende:</strong> Vende tu pescado en el Mercado (🛒).</li>
+        <li style="margin-bottom: 10px;">🛠️ <strong>Mejora:</strong> Usa el dinero para mejorar tu caña y barco.</li>
+        <li style="margin-bottom: 10px;">🎯 <strong>Progresa:</strong> Revisa tus Objetivos (🎯) para guiarte y ganar recompensas.</li>
+      </ul>
+
+      <p style="margin-top: 20px;">¡Que tengas buena pesca!</p>
     </div>
   </div>
 </template>
