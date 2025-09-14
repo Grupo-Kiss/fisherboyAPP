@@ -1,10 +1,10 @@
 <template>
-  <div class="water" :class="[currentPartOfDay, { 'storm-active': stormActive }]" :style="{ height: '100%' }" @mousedown="startPress" @mouseup="endPress" @touchstart.prevent="startPress" @touchend.prevent="endPress">
+  <div class="water" :class="[currentPartOfDay, { 'storm-active': stormActive }]" :style="{ height: '100%' }">
     <div
       v-for="fish in fishes"
       :key="fish.id"
       class="fish"
-      :class="[fish.direction, fish.size, { 'exotic': fish.isExotic }]"
+      :class="[fish.direction, fish.size, { 'exotic': fish.isExotic, 'has-bubbles': fish.hasBubbles }]"
       :style="{ top: fish.y + '%', left: fish.x + '%', animationDuration: fish.speed + 's' }"
       v-html="fish.shape"
     ></div>
@@ -36,10 +36,12 @@ export default {
       const fishType = fishTypes.value[Math.floor(Math.random() * fishTypes.value.length)];
       const direction = Math.random() > 0.5 ? 'swimming-right' : 'swimming-left';
       const size = ['size-small', 'size-medium', 'size-large'][Math.floor(Math.random() * 3)];
-      const speed = Math.random() * 5 + 5; // 5-10 seconds
+      const speed = Math.random() * 10 + 5; // 5-15 seconds
       const y = Math.random() * 80; // 0-80% from top of water
       const x = direction === 'swimming-right' ? -10 : 110; // Start off-screen
       const shape = fishShapes[Math.floor(Math.random() * fishShapes.length)].replace('{color}', fishType.color);
+
+      const hasBubbles = Math.random() < 0.2; // 20% chance of having bubbles
 
       fishes.value.push({
         id: Date.now() + Math.random(),
@@ -51,31 +53,14 @@ export default {
         y,
         x,
         isExotic: fishType.isExotic || false,
-        shape
+        shape,
+        hasBubbles
       });
 
       // Eliminar el pez después de que termine su animación
       setTimeout(() => {
         fishes.value.shift();
       }, speed * 1000);
-    };
-
-    let pressTimer = null;
-    let isLongPress = false;
-
-    const startPress = () => {
-      isLongPress = false;
-      pressTimer = setTimeout(() => {
-        isLongPress = true;
-        store.dispatch('startDeepFishing');
-      }, 500); // 500ms for long press
-    };
-
-    const endPress = () => {
-      clearTimeout(pressTimer);
-      if (!isLongPress) {
-        store.dispatch('startFishing');
-      }
     };
 
     onMounted(() => {
@@ -90,8 +75,6 @@ export default {
       stormActive,
       fishes,
       currentPartOfDay,
-      startPress,
-      endPress,
     };
   },
 };

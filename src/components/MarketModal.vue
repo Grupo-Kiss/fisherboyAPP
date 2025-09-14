@@ -4,20 +4,7 @@
       <span class="close" @click="close">&times;</span>
       <h2>Mercado del Pescador</h2>
       <div class="market-equipment">
-        <div class="equipment-category">
-          <h3>Vender Pescado</h3>
-          <div class="equipment-items">
-            <div class="equipment-item">
-              <div class="equipment-info">
-                <div class="equipment-name">Pescado en el inventario</div>
-                <div class="equipment-stats">Valor total: ${{ totalFishValue }}</div>
-              </div>
-              <button class="btn btn-primary" @click="sellAllFish" :disabled="caughtFishInventory.length === 0">
-                Vender Todo
-              </button>
-            </div>
-          </div>
-        </div>
+        
 
         <div class="equipment-category">
           <h3>Cañas de Pescar</h3>

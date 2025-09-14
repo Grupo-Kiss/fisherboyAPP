@@ -1,6 +1,6 @@
 <template>
   <div id="boat" :style="{ left: boatPosition + '%', bottom: boatPositionY + '%' }">
-    <div id="fisher"></div>
+    <div id="fisher" @click="startFishing"></div>
     <div id="fishingLine" :class="fishingDepth" :style="{ backgroundColor: fishingLineColor }"></div>
   </div>
 </template>
@@ -33,6 +33,7 @@ export default {
       boatPositionY,
       fishingDepth,
       fishingLineColor,
+      startFishing: () => store.dispatch('startFishing'),
     };
   },
 };

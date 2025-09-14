@@ -21,7 +21,7 @@ const initialState = {
     currentRod: 0,
     currentBoat: 0,
     unlockedRods: [true, false, false],
-    unlockedBoats: [true, false, false],
+    unlockedBoats: [true, false, false, false, false],
     caughtFishInventory: [],
     caughtTrashInventory: [],
     caughtTreasuresInventory: [],
@@ -46,6 +46,8 @@ const initialState = {
     fishFightRequiredTaps: 0,
     fishFightTimer: 0,
     fishFightActive: false,
+    currentEvent: null,
+    eventActive: false,
     modals: {
     market: false,
     stats: false,
@@ -62,83 +64,86 @@ const initialState = {
     currentZone: 1,
     zones: [
     { id: 1, name: "Lago Clemente", cost: 0, unlocked: true, color: "#4a90e2" },
-    { id: 2, name: "Lago Mafalda", cost: 10000, unlocked: false, color: "#50e3c2" },
-    { id: 3, name: "Mar Diogenes", cost: 20000, unlocked: false, color: "#bd10e0" },
-    { id: 4, name: "Mar Profundo de Boogie el aceitoso", cost: 30000, unlocked: false, color: "#9013fe" },
-    { id: 5, name: "Laguna Tía Vicenta", cost: 40000, unlocked: false, color: "#f5a623" },
-    { id: 6, name: "Laguna Patoruzú", cost: 50000, unlocked: false, color: "#d0021b" },
+    { id: 2, name: "Lago Mafalda", cost: 15000, unlocked: false, color: "#50e3c2" },
+    { id: 3, name: "Mar Diogenes", cost: 30000, unlocked: false, color: "#bd10e0" },
+    { id: 4, name: "Mar Profundo de Boogie el aceitoso", cost: 100000, unlocked: false, color: "#9013fe" },
+    { id: 5, name: "Laguna Tía Vicenta", cost: 650000, unlocked: false, color: "#f5a623" },
+    { id: 6, name: "Laguna Patoruzú", cost: 1250000, unlocked: false, color: "#d0021b" },
     ],
     currentGoals: [],
     completedGoals: [],
-        goalDefinitions: {
-    // Tutorial/Early Game Goals
-    'goal_catch_10_common_fish': { id: 'goal_catch_10_common_fish', description: "Pesca 10 peces comunes", type: "catchCommonFish", target: 10, reward: 2000, category: "tutorial" },
-    'goal_earn_500_money': { id: 'goal_earn_500_money', description: "Gana $500", type: "earnMoney", target: 500, reward: 2000, category: "tutorial" },
-    'goal_buy_pro_rod': { id: 'goal_buy_pro_rod', description: "Compra la Caña Profesional", type: "buyRod", target: 1, reward: 5000, category: "equipment" },
-    'goal_buy_adv_boat': { id: 'goal_buy_adv_boat', description: "Compra el Barco Avanzado", type: "buyBoat", target: 1, reward: 10000, category: "equipment" },
-
-    // Incremental Fishing Goals (Common)
-    'goal_catch_50_common_fish': { id: 'goal_catch_50_common_fish', description: "Pesca 50 peces comunes", type: "catchCommonFish", target: 50, reward: 3000, category: "fishing" },
-    'goal_catch_100_common_fish': { id: 'goal_catch_100_common_fish', description: "Pesca 100 peces comunes", type: "catchCommonFish", target: 100, reward: 6000, category: "fishing" },
-    'goal_catch_500_common_fish': { id: 'goal_catch_500_common_fish', description: "Pesca 500 peces comunes", type: "catchCommonFish", target: 500, reward: 20000, category: "fishing" },
-    'goal_catch_1000_common_fish': { id: 'goal_catch_1000_common_fish', description: "Pesca 1000 peces comunes", type: "catchCommonFish", target: 1000, reward: 50000, category: "fishing" },
-
-    // Incremental Fishing Goals (Exotic)
-    'goal_catch_5_exotic_fish': { id: 'goal_catch_5_exotic_fish', description: "Pesca 5 peces exóticos", type: "catchExoticFish", target: 5, reward: 15000, category: "fishing" },
-    'goal_catch_20_exotic_fish': { id: 'goal_catch_20_exotic_fish', description: "Pesca 20 peces exóticos", type: "catchExoticFish", target: 20, reward: 30000, category: "fishing" },
-    'goal_catch_50_exotic_fish': { id: 'goal_catch_50_exotic_fish', description: "Pesca 50 peces exóticos", type: "catchExoticFish", target: 50, reward: 50000, category: "fishing" },
-
-    // Incremental Fishing Goals (Legendary)
-    'goal_catch_1_legendary_fish': { id: 'goal_catch_1_legendary_fish', description: "Pesca 1 pez legendario", type: "catchLegendaryFish", target: 1, reward: 20000, category: "fishing" },
-    'goal_catch_5_legendary_fish': { id: 'goal_catch_5_legendary_fish', description: "Pesca 5 peces legendarios", type: "catchLegendaryFish", target: 5, reward: 40000, category: "fishing" },
-    'goal_catch_10_legendary_fish': { id: 'goal_catch_10_legendary_fish', description: "Pesca 10 peces legendarios", type: "catchLegendaryFish", target: 10, reward: 50000, category: "fishing" },
-
-    // Money Goals
-    'goal_earn_10000_money': { id: 'goal_earn_10000_money', description: "Gana $10,000", type: "earnMoney", target: 10000, reward: 5000, category: "money" },
-    'goal_earn_50000_money': { id: 'goal_earn_50000_money', description: "Gana $50,000", type: "earnMoney", target: 50000, reward: 15000, category: "money" },
-    'goal_earn_100000_money': { id: 'goal_earn_100000_money', description: "Gana $100,000", type: "earnMoney", target: 100000, reward: 30000, category: "money" },
-    'goal_earn_1000000_money': { id: 'goal_earn_1000000_money', description: "Gana $1,000,000", type: "earnMoney", target: 1000000, reward: 50000, category: "money" },
-
-    // Recycling Goals
-    'goal_recycle_10_items': { id: 'goal_recycle_10_items', description: "Recicla 10 objetos", type: "recycleItems", target: 10, reward: 2000, category: "recycling" },
-    'goal_recycle_50_items': { id: 'goal_recycle_50_items', description: "Recicla 50 objetos", type: "recycleItems", target: 50, reward: 8000, category: "recycling" },
-    'goal_recycle_100_items': { id: 'goal_recycle_100_items', description: "Recicla 100 objetos", type: "recycleItems", target: 100, reward: 20000, category: "recycling" },
-    'goal_recycle_500_items': { id: 'goal_recycle_500_items', description: "Recicla 500 objetos", type: "recycleItems", target: 500, reward: 50000, category: "recycling" },
-
-    // Treasure Goals
-    'goal_find_1_treasure': { id: 'goal_find_1_treasure', description: "Encuentra 1 tesoro", type: "findTreasure", target: 1, reward: 5000, category: "treasure" },
-    'goal_find_5_treasures': { id: 'goal_find_5_treasures', description: "Encuentra 5 tesoros", type: "findTreasure", target: 5, reward: 15000, category: "treasure" },
-    'goal_find_10_treasures': { id: 'goal_find_10_treasures', description: "Encuentra 10 tesoros", type: "findTreasure", target: 10, reward: 30000, category: "treasure" },
-    'goal_find_all_unique_treasures': { id: 'goal_find_all_unique_treasures', description: "Encuentra todos los tesoros únicos", type: "findAllUniqueTreasures", target: 28, reward: 50000, category: "treasure" },
-
-    // Equipment Goals
-    'goal_buy_master_rod': { id: 'goal_buy_master_rod', description: "Compra la Caña Maestra", type: "buyRod", target: 2, reward: 20000, category: "equipment" },
-    'goal_buy_pro_boat': { id: 'goal_buy_pro_boat', description: "Compra el Barco Profesional", type: "buyBoat", target: 2, reward: 50000, category: "equipment" },
-
-    // Zone Goals
-    'goal_unlock_zone_2': { id: 'goal_unlock_zone_2', description: "Desbloquea el Lago Mafalda", type: "unlockZone", target: 2, reward: 10000, category: "zone" },
-    'goal_unlock_zone_3': { id: 'goal_unlock_zone_3', description: "Desbloquea el Mar Diogenes", type: "unlockZone", target: 3, reward: 20000, category: "zone" },
-    'goal_unlock_zone_4': { id: 'goal_unlock_zone_4', description: "Desbloquea el Mar Profundo de Boogie el aceitoso", type: "unlockZone", target: 4, reward: 30000, category: "zone" },
-    'goal_unlock_zone_5': { id: 'goal_unlock_zone_5', description: "Desbloquea la Laguna Tía Vicenta", type: "unlockZone", target: 5, reward: 40000, category: "zone" },
-    'goal_unlock_zone_6': { id: 'goal_unlock_zone_6', description: "Desbloquea la Laguna Patoruzú", type: "unlockZone", target: 6, reward: 50000, category: "zone" },
-
-    // Specific Fish Goals
-    'goal_catch_shark': { id: 'goal_catch_shark', description: "Pesca un Tiburón", type: "catchSpecificFish", fishName: "Tiburón", target: 1, reward: 25000, category: "fishing" },
-    'goal_catch_golden_fish': { id: 'goal_catch_golden_fish', description: "Pesca un Pez Dorado", type: "catchSpecificFish", fishName: "Pez Dorado", target: 1, reward: 20000, category: "fishing" },
-    'goal_catch_celestial_dragon_fish': { id: 'goal_catch_celestial_dragon_fish', description: "Pesca un Pez Dragón Celestial", type: "catchSpecificFish", fishName: "Pez Dragón Celestial", target: 1, reward: 50000, category: "fishing" },
-
-    // Specific Treasure Goals
-    'goal_find_nokia_1100': { id: 'goal_find_nokia_1100', description: "Encuentra un Nokia 1100", type: "findSpecificTreasure", treasureName: "Nokia 1100", target: 1, reward: 10000, category: "treasure" },
-    'goal_find_diamond': { id: 'goal_find_diamond', description: "Encuentra un Diamante", type: "findSpecificTreasure", treasureName: "Diamante", target: 1, reward: 50000, category: "treasure" },
-
-    // Category Completion Goals
-    'goal_complete_all_fishing_goals': { id: 'goal_complete_all_fishing_goals', description: "Completa todos los objetivos de pesca", type: "completeAllCategoryGoals", category: "fishing", reward: 50000, category: "completionist" },
-    'goal_complete_all_treasure_goals': { id: 'goal_complete_all_treasure_goals', description: "Completa todos los objetivos de tesoros", type: "completeAllCategoryGoals", category: "treasure", reward: 50000, category: "completionist" },
-    'goal_complete_all_equipment_goals': { id: 'goal_complete_all_equipment_goals', description: "Completa todos los objetivos de equipamiento", type: "completeAllCategoryGoals", category: "equipment", reward: 50000, category: "completionist" },
-    'goal_complete_all_money_goals': { id: 'goal_complete_all_money_goals', description: "Completa todos los objetivos de dinero", type: "completeAllCategoryGoals", category: "money", reward: 50000, category: "completionist" },
-    'goal_complete_all_recycling_goals': { id: 'goal_complete_all_recycling_goals', description: "Completa todos los objetivos de reciclaje", type: "completeAllCategoryGoals", category: "recycling", reward: 50000, category: "completionist" },
-    'goal_complete_all_zone_goals': { id: 'goal_complete_all_zone_goals', description: "Completa todos los objetivos de zonas", type: "completeAllCategoryGoals", category: "zone", reward: 50000, category: "completionist" },
-    },
+    goalDefinitions: {
+        // Tutorial/Early Game Goals
+        'goal_catch_50_common_fish': { id: 'goal_catch_50_common_fish', description: "Pesca 50 peces comunes", type: "catchCommonFish", target: 50, reward: 15000, category: "tutorial" },
+        'goal_earn_10000_money': { id: 'goal_earn_10000_money', description: "Gana $10,000", type: "earnMoney", target: 10000, reward: 5000, category: "tutorial" },
+        'goal_buy_pro_rod': { id: 'goal_buy_pro_rod', description: "Compra la Caña Profesional", type: "buyRod", target: 1, reward: 7500, category: "equipment" },
+        'goal_buy_adv_boat': { id: 'goal_buy_adv_boat', description: "Compra el Barco Avanzado", type: "buyBoat", target: 1, reward: 15000, category: "equipment" },
+        'goal_one_year_fishing': { id: 'goal_one_year_fishing', description: "Cumple un año pescando (Día 13)", type: "reachDay", target: 13, reward: 12000, category: "time" },
+        'goal_two_years_fishing': { id: 'goal_two_years_fishing', description: "Cumple 2 años pescando (Día 25)", type: "reachDay", target: 25, reward: 24000, category: "time" },
+        'goal_five_years_fishing': { id: 'goal_five_years_fishing', description: "Cumple 5 años pescando (Día 61)", type: "reachDay", target: 61, reward: 60000, category: "time" },
+        'goal_ten_years_fishing': { id: 'goal_ten_years_fishing', description: "Cumple 10 años pescando (Día 121)", type: "reachDay", target: 121, reward: 120000, category: "time" },
+    
+        // Incremental Fishing Goals (Common)
+        'goal_catch_200_common_fish': { id: 'goal_catch_200_common_fish', description: "Pesca 200 peces comunes", type: "catchCommonFish", target: 200, reward: 30000, category: "fishing" },
+        'goal_catch_500_common_fish': { id: 'goal_catch_500_common_fish', description: "Pesca 500 peces comunes", type: "catchCommonFish", target: 500, reward: 75000, category: "fishing" },
+        'goal_catch_1000_common_fish': { id: 'goal_catch_1000_common_fish', description: "Pesca 1000 peces comunes", type: "catchCommonFish", target: 1000, reward: 150000, category: "fishing" },
+    
+        // Incremental Fishing Goals (Exotic)
+        'goal_catch_10_exotic_fish': { id: 'goal_catch_10_exotic_fish', description: "Pesca 10 peces exóticos", type: "catchExoticFish", target: 10, reward: 25000, category: "fishing" },
+        'goal_catch_50_exotic_fish': { id: 'goal_catch_50_exotic_fish', description: "Pesca 50 peces exóticos", type: "catchExoticFish", target: 50, reward: 125000, category: "fishing" },
+        'goal_catch_100_exotic_fish': { id: 'goal_catch_100_exotic_fish', description: "Pesca 100 peces exóticos", type: "catchExoticFish", target: 100, reward: 250000, category: "fishing" },
+    
+        // Incremental Fishing Goals (Legendary)
+        'goal_catch_1_legendary_fish': { id: 'goal_catch_1_legendary_fish', description: "Pesca 1 pez legendario", type: "catchLegendaryFish", target: 1, reward: 50000, category: "fishing" },
+        'goal_catch_5_legendary_fish': { id: 'goal_catch_5_legendary_fish', description: "Pesca 5 peces legendarios", type: "catchLegendaryFish", target: 5, reward: 250000, category: "fishing" },
+        'goal_catch_10_legendary_fish': { id: 'goal_catch_10_legendary_fish', description: "Pesca 10 peces legendarios", type: "catchLegendaryFish", target: 10, reward: 500000, category: "fishing" },
+    
+        // Money Goals
+        'goal_earn_50000_money': { id: 'goal_earn_50000_money', description: "Gana $50,000", type: "earnMoney", target: 50000, reward: 10000, category: "money" },
+        'goal_earn_250000_money': { id: 'goal_earn_250000_money', description: "Gana $250,000", type: "earnMoney", target: 250000, reward: 50000, category: "money" },
+        'goal_earn_1000000_money': { id: 'goal_earn_1000000_money', description: "Gana $1,000,000", type: "earnMoney", target: 1000000, reward: 200000, category: "money" },
+        'goal_earn_5000000_money': { id: 'goal_earn_5000000_money', description: "Gana $5,000,000", type: "earnMoney", target: 5000000, reward: 1000000, category: "money" },
+    
+        // Recycling Goals
+        'goal_recycle_50_items': { id: 'goal_recycle_50_items', description: "Recicla 50 objetos", type: "recycleItems", target: 50, reward: 10000, category: "recycling" },
+        'goal_recycle_200_items': { id: 'goal_recycle_200_items', description: "Recicla 200 objetos", type: "recycleItems", target: 200, reward: 40000, category: "recycling" },
+        'goal_recycle_1000_items': { id: 'goal_recycle_1000_items', description: "Recicla 1000 objetos", type: "recycleItems", target: 1000, reward: 200000, category: "recycling" },
+    
+        // Treasure Goals
+        'goal_find_5_treasures': { id: 'goal_find_5_treasures', description: "Encuentra 5 tesoros", type: "findTreasure", target: 5, reward: 25000, category: "treasure" },
+        'goal_find_15_treasures': { id: 'goal_find_15_treasures', description: "Encuentra 15 tesoros", type: "findTreasure", target: 15, reward: 75000, category: "treasure" },
+        'goal_find_all_unique_treasures': { id: 'goal_find_all_unique_treasures', description: "Encuentra todos los tesoros únicos", type: "findAllUniqueTreasures", target: 28, reward: 500000, category: "treasure" },
+    
+        // Equipment Goals
+        'goal_buy_master_rod': { id: 'goal_buy_master_rod', description: "Compra la Caña Maestra", type: "buyRod", target: 2, reward: 50000, category: "equipment" },
+        'goal_buy_pro_boat': { id: 'goal_buy_pro_boat', description: "Compra el Barco Profesional", type: "buyBoat", target: 2, reward: 100000, category: "equipment" },
+        'goal_buy_pesquero_boat': { id: 'goal_buy_pesquero_boat', description: "Compra el Barco Pesquero", type: "buyBoat", target: 3, reward: 200000, category: "equipment" },
+        'goal_buy_crucero_boat': { id: 'goal_buy_crucero_boat', description: "Compra el Crucero", type: "buyBoat", target: 4, reward: 500000, category: "equipment" },
+    
+        // Zone Goals
+        'goal_unlock_zone_2': { id: 'goal_unlock_zone_2', description: "Desbloquea el Lago Mafalda", type: "unlockZone", target: 2, reward: 10000, category: "zone" },
+        'goal_unlock_zone_3': { id: 'goal_unlock_zone_3', description: "Desbloquea el Mar Diogenes", type: "unlockZone", target: 3, reward: 20000, category: "zone" },
+        'goal_unlock_zone_4': { id: 'goal_unlock_zone_4', description: "Desbloquea el Mar Profundo de Boogie el aceitoso", type: "unlockZone", target: 4, reward: 30000, category: "zone" },
+        'goal_unlock_zone_5': { id: 'goal_unlock_zone_5', description: "Desbloquea la Laguna Tía Vicenta", type: "unlockZone", target: 5, reward: 40000, category: "zone" },
+        'goal_unlock_zone_6': { id: 'goal_unlock_zone_6', description: "Desbloquea la Laguna Patoruzú", type: "unlockZone", target: 6, reward: 50000, category: "zone" },
+    
+        // Specific Fish Goals
+        'goal_catch_shark': { id: 'goal_catch_shark', description: "Pesca un Tiburón", type: "catchSpecificFish", fishName: "Tiburón", target: 1, reward: 30000, category: "fishing" },
+        'goal_catch_golden_fish': { id: 'goal_catch_golden_fish', description: "Pesca un Pez Dorado", type: "catchSpecificFish", fishName: "Pez Dorado", target: 1, reward: 25000, category: "fishing" },
+        'goal_catch_celestial_dragon_fish': { id: 'goal_catch_celestial_dragon_fish', description: "Pesca un Pez Dragón Celestial", type: "catchSpecificFish", fishName: "Pez Dragón Celestial", target: 1, reward: 100000, category: "fishing" },
+    
+        // Specific Treasure Goals
+        'goal_find_nokia_1100': { id: 'goal_find_nokia_1100', description: "Encuentra un Nokia 1100", type: "findSpecificTreasure", treasureName: "Nokia 1100", target: 1, reward: 15000, category: "treasure" },
+        'goal_find_diamond': { id: 'goal_find_diamond', description: "Encuentra un Diamante", type: "findSpecificTreasure", treasureName: "Diamante", target: 1, reward: 100000, category: "treasure" },
+    
+        // Category Completion Goals
+        'goal_complete_all_fishing_goals': { id: 'goal_complete_all_fishing_goals', description: "Completa todos los objetivos de pesca", type: "completeAllCategoryGoals", category: "fishing", reward: 100000, category: "completionist" },
+        'goal_complete_all_treasure_goals': { id: 'goal_complete_all_treasure_goals', description: "Completa todos los objetivos de tesoros", type: "completeAllCategoryGoals", category: "treasure", reward: 100000, category: "completionist" },
+        'goal_complete_all_equipment_goals': { id: 'goal_complete_all_equipment_goals', description: "Completa todos los objetivos de equipamiento", type: "completeAllCategoryGoals", category: "equipment", reward: 100000, category: "completionist" },
+        'goal_complete_all_money_goals': { id: 'goal_complete_all_money_goals', description: "Completa todos los objetivos de dinero", type: "completeAllCategoryGoals", category: "money", reward: 100000, category: "completionist" },
+        'goal_complete_all_recycling_goals': { id: 'goal_complete_all_recycling_goals', description: "Completa todos los objetivos de reciclaje", type: "completeAllCategoryGoals", category: "recycling", reward: 100000, category: "completionist" },
+        'goal_complete_all_zone_goals': { id: 'goal_complete_all_zone_goals', description: "Completa todos los objetivos de zonas", type: "completeAllCategoryGoals", category: "zone", reward: 100000, category: "completionist" },
+        },
     tips: [
     "Los tiburones son criaturas nocturnas. Intenta pescar de noche para tener la oportunidad de atrapar uno.",
     "Los tesoros más valiosos se esconden en las profundidades. Necesitarás el Barco Profesional para llegar a ellos.",
@@ -173,7 +178,9 @@ const initialState = {
     boats: [
     { name: "Barco Básico", speedMultiplier: 1, catchBonus: 1, price: 0, image: 'https://moroarte.com/games/boat.png' },
     { name: "Barco Avanzado", speedMultiplier: 1.5, catchBonus: 1.2, price: 25000, image: 'https://moroarte.com/games/botelvl1.png' },
-    { name: "Barco Profesional", speedMultiplier: 2, catchBonus: 1.5, price: 100000, image: 'https://moroarte.com/games/botelvl2.png' }
+    { name: "Barco Profesional", speedMultiplier: 2, catchBonus: 1.5, price: 100000, image: 'https://moroarte.com/games/botelvl2.png' },
+    { name: "Barco Pesquero", speedMultiplier: 2.5, catchBonus: 2, price: 500000, image: 'https://moroarte.com/games/botelvl3.png' },
+    { name: "Crucero", speedMultiplier: 3, catchBonus: 2.5, price: 1000000, image: 'https://moroarte.com/games/botelvl4.png' }
     ],
     trashTypes: [
     { name: "Botella de Plástico", recycleValue: 133 },
@@ -284,7 +291,17 @@ const store = createStore({
             });
         },
         setMoney(state, amount) { state.money = amount; },
-        addMoney(state, amount) { state.money += amount; },
+        addMoney(state, amount) { 
+            let finalAmount = amount;
+            if (state.eventActive && state.currentEvent.type === 'storm') {
+                if (state.currentEvent.effect === 'double_rewards') {
+                    finalAmount *= 2;
+                } else if (state.currentEvent.effect === 'halve_rewards') {
+                    finalAmount *= 0.5;
+                }
+            }
+            state.money += finalAmount; 
+        },
         spendMoney(state, amount) { state.money -= amount; },
         addEnergy(state, amount) {
           state.energy = Math.min(100, state.energy + amount);
@@ -352,17 +369,21 @@ const store = createStore({
             state.currentGoals.push({ ...goalDefinition, current: 0, completed: false });
         }
         },
-        updateGoalProgress(state, { type, amount, id = null }) {
+        updateGoalProgress(state, { type, amount, id = null, day = null }) {
         state.currentGoals.forEach(goal => {
             // If an ID is provided, only update that specific goal
             if (id && goal.id !== id) {
             return;
             }
             if (goal.type === type && !goal.completed) {
-            goal.current += amount;
-            if (goal.current >= goal.target) {
-                goal.current = goal.target; // Cap current at target
-            }
+                if (type === 'reachDay') {
+                    goal.current = day;
+                } else {
+                    goal.current += amount;
+                }
+                if (goal.current >= goal.target) {
+                    goal.current = goal.target; // Cap current at target
+                }
             }
         });
         },
@@ -421,6 +442,10 @@ const store = createStore({
                 goal.current++;
             }
         },
+        setEvent(state, event) {
+            state.currentEvent = event;
+            state.eventActive = !!event;
+        },
     },
     actions: {
         restartGame({ commit }) {
@@ -432,28 +457,21 @@ const store = createStore({
         commit('toggleModal', 'instructions');
         commit('addMessage', { text: '¡Bienvenido a Fisherboy! Lanzá tu caña y que comience la aventura.', type: 'system' });
         // Add initial goals
-        commit('addGoal', 'goal_catch_10_common_fish');
-        commit('addGoal', 'goal_earn_500_money');
         commit('addGoal', 'goal_catch_50_common_fish');
         commit('addGoal', 'goal_earn_10000_money');
-        commit('addGoal', 'goal_recycle_10_items');
-        commit('addGoal', 'goal_find_1_treasure');
-        commit('addGoal', 'goal_unlock_zone_2');
-        commit('addGoal', 'goal_unlock_zone_3');
-        commit('addGoal', 'goal_unlock_zone_4');
-        commit('addGoal', 'goal_unlock_zone_5');
-        commit('addGoal', 'goal_unlock_zone_6');
-        commit('addGoal', 'goal_catch_shark');
-        commit('addGoal', 'goal_catch_golden_fish');
-        commit('addGoal', 'goal_catch_celestial_dragon_fish');
-        commit('addGoal', 'goal_find_nokia_1100');
-        commit('addGoal', 'goal_find_diamond');
-        commit('addGoal', 'goal_complete_all_fishing_goals');
-        commit('addGoal', 'goal_complete_all_treasure_goals');
-        commit('addGoal', 'goal_complete_all_equipment_goals');
-        commit('addGoal', 'goal_complete_all_money_goals');
-        commit('addGoal', 'goal_complete_all_recycling_goals');
-        commit('addGoal', 'goal_complete_all_zone_goals');
+        commit('addGoal', 'goal_one_year_fishing');
+        commit('addGoal', 'goal_buy_pro_rod');
+        commit('addGoal', 'goal_buy_adv_boat');
+        commit('addGoal', 'goal_buy_pesquero_boat');
+        commit('addGoal', 'goal_buy_crucero_boat');
+        commit('addGoal', 'goal_catch_10_exotic_fish');
+        commit('addGoal', 'goal_catch_1_legendary_fish');
+        commit('addGoal', 'goal_find_5_treasures');
+        commit('addGoal', 'goal_earn_1000000_money');
+        commit('addGoal', 'goal_earn_5000000_money');
+        commit('addGoal', 'goal_two_years_fishing');
+        commit('addGoal', 'goal_five_years_fishing');
+        commit('addGoal', 'goal_ten_years_fishing');
         },
         showRandomTip({ commit, state }) {
         if (state.messages.length === 0) {
@@ -507,7 +525,17 @@ const store = createStore({
         const newTime = state.gameTime + 2.4;
         if (newTime >= 1440) {
             commit('setGameTime', 0);
-            commit('setCurrentDay', state.currentDay + 1);
+            const newDay = state.currentDay + 1;
+            commit('setCurrentDay', newDay);
+            commit('updateGoalProgress', { type: 'reachDay', day: newDay });
+            dispatch('checkAndAwardGoals');
+
+            // Special event trigger (every 5 days)
+            if (newDay % 5 === 0) {
+                dispatch('triggerRandomEvent');
+            } else {
+                commit('setEvent', null); // Reset event
+            }
         } else {
             commit('setGameTime', newTime);
         }
@@ -531,8 +559,8 @@ const store = createStore({
         }
         },
         moveBoat({ commit, state }, { x = 0, y = 0 }) {
-        const newX = state.boatPosition + x * 0.1;
-        const newY = state.boatPositionY + y * 0.1;
+        const newX = state.boatPosition + x * 2;
+        const newY = state.boatPositionY + y * 2;
         if (newX >= 0 && newX <= 100) {
             commit('setBoatPosition', { x: newX });
         }
@@ -546,6 +574,70 @@ const store = createStore({
         commit('setFishingDepth', 'normal');
         commit('setEnergy', state.energy - 10);
         commit('addMessage', { text: 'Lanzando la caña... ¡A ver qué pica!', type: 'system' });
+
+        // Event: Salmon and Plastic
+        if (state.eventActive && state.currentEvent.effect === 'salmon_and_plastic') {
+            setTimeout(() => {
+                if (Math.random() < 0.5) {
+                    const salmon = state.fishTypes.find(f => f.name === 'Salmón');
+                    const value = Math.floor(salmon.value * (state.isNight ? 1.5 : 1));
+                    commit('addMessage', { text: `¡Genial! Has atrapado un ${salmon.name} con un valor de ${value}$.`, type: 'catch' });
+                    commit('updateFishingStats', { fish: salmon, value });
+                    commit('addCaughtFish', { ...salmon, value });
+                    commit('incrementCommonFishCount');
+                    commit('updateGoalProgress', { type: 'catchCommonFish', amount: 1 });
+                    commit('addMoney', value);
+                } else {
+                    const plasticBag = { name: "Bolsa de Plástico", recycleValue: 56 };
+                    commit('addCaughtTrash', plasticBag);
+                    commit('incrementTrashCount');
+                    commit('addMessage', { text: `¡Oh, no! Has pescado ${plasticBag.name}.`, type: 'catch' });
+                }
+                commit('setIsFishing', false);
+                commit('setFishingDepth', null);
+            }, 1000);
+            return;
+        }
+
+        // Event: Treasure Hunt
+        if (state.eventActive && state.currentEvent.effect === 'treasures_only') {
+            setTimeout(() => {
+                // Treasure hunting logic
+                const availableTreasures = state.treasureTypes;
+
+                if (availableTreasures.length > 0) {
+                    const totalRarity = availableTreasures.reduce((sum, treasure) => sum + treasure.rarity, 0);
+                    let random = Math.random() * totalRarity;
+                    let treasureToCatch = null;
+
+                    for (const treasure of availableTreasures) {
+                        random -= treasure.rarity;
+                        if (random <= 0) {
+                            treasureToCatch = treasure;
+                            break;
+                        }
+                    }
+
+                    if (treasureToCatch) {
+                        commit('addMessage', { text: `¡Increíble! Has encontrado un tesoro: ${treasureToCatch.name}!`, type: 'achievement' });
+                        commit('addCaughtTreasure', treasureToCatch);
+                        commit('incrementTreasuresCount');
+                        if (treasureToCatch.value > 0) {
+                            commit('addMoney', treasureToCatch.value);
+                        }
+                        commit('updateGoalProgress', { type: 'findTreasure', amount: 1 });
+                        commit('updateSpecificGoal', { type: 'findSpecificTreasure', name: treasureToCatch.name });
+                        commit('updateUniqueTreasureGoal');
+                    }
+                } else {
+                    commit('addMessage', { text: 'No hay tesoros en esta zona.', type: 'system' });
+                }
+                commit('setIsFishing', false);
+                commit('setFishingDepth', null);
+            }, 1000);
+            return;
+        }
+
         setTimeout(() => {
             const boat = state.boats[state.currentBoat];
             const rod = state.fishingRods[state.currentRod];
@@ -604,30 +696,6 @@ const store = createStore({
                 }
 
                 if (fishToCatch) {
-                if (fishToCatch.value > 1000 || fishToCatch.isExotic) {
-                    commit('setFishToCatch', fishToCatch);
-                    commit('setFishFighting', true);
-                    commit('setFishFightProgress', 0);
-                    // Taps required based on fish value/rarity, e.g., 10 taps for every 1000 value, min 5 taps
-                    const requiredTaps = Math.max(5, Math.floor(fishToCatch.value / 1000) * 2);
-                    commit('setFishFightRequiredTaps', requiredTaps);
-                    commit('setFishFightTimer', 5); // 5 seconds for the mini-game
-                    commit('setFishFightActive', true);
-                    commit('addMessage', { text: `¡Un pez enorme ha picado! ¡Toca repetidamente para no dejarlo escapar!`, type: 'warning' });
-
-                    // Start the mini-game timer
-                    let timer = state.fishFightTimer;
-                    const interval = setInterval(() => {
-                        timer--;
-                        commit('setFishFightTimer', timer);
-                        if (timer <= 0) {
-                            clearInterval(interval);
-                            if (state.fishFightProgress < state.fishFightRequiredTaps) {
-                                dispatch('fightFish', { success: false }); // Fish escapes if time runs out
-                            }
-                        }
-                    }, 1000); // Update every second
-                } else {
                     const value = Math.floor(fishToCatch.value * (state.isNight ? 1.5 : 1));
                     commit('addMessage', { text: `¡Genial! Has atrapado un ${fishToCatch.name} con un valor de ${value}$.`, type: 'catch' });
                     commit('updateFishingStats', { fish: fishToCatch, value });
@@ -643,7 +711,6 @@ const store = createStore({
                         commit('updateGoalProgress', { type: 'catchCommonFish', amount: 1 }); // Added
                     }
                     commit('addMoney', value);
-                }
                 } else {
                     commit('addMessage', { text: 'Parece que hoy no pican...', type: 'system' });
                 }
@@ -662,19 +729,102 @@ const store = createStore({
         commit('setEnergy', state.energy - 20); // Increased energy cost
         commit('addMessage', { text: 'Lanzando la caña a las profundidades... ¿Qué misterios nos aguardan?', type: 'system' });
 
-        setTimeout(() => {
-            // Treasure hunting logic
-            if (Math.random() < 0.2) { // 20% chance of finding a treasure
-                let maxTreasureValue = 400; // Default for early days
-                if (state.currentDay > 20) {
-                    maxTreasureValue = Infinity; // All treasures
-                } else if (state.currentDay > 10) {
-                    maxTreasureValue = 20000;
-                } else if (state.currentDay > 5) {
-                    maxTreasureValue = 5000;
-                }
+        // Event: Treasure Hunt
+        if (state.eventActive && state.currentEvent.effect === 'treasures_only') {
+            setTimeout(() => {
+                // Treasure hunting logic
+                const availableTreasures = state.treasureTypes;
 
-                const availableTreasures = state.treasureTypes.filter(treasure => treasure.value <= maxTreasureValue && treasure.zone === state.currentZone);
+                if (availableTreasures.length > 0) {
+                    const totalRarity = availableTreasures.reduce((sum, treasure) => sum + treasure.rarity, 0);
+                    let random = Math.random() * totalRarity;
+                    let treasureToCatch = null;
+
+                    for (const treasure of availableTreasures) {
+                        random -= treasure.rarity;
+                        if (random <= 0) {
+                            treasureToCatch = treasure;
+                            break;
+                        }
+                    }
+
+                    if (treasureToCatch) {
+                        commit('addMessage', { text: `¡Increíble! Has encontrado un tesoro: ${treasureToCatch.name}!`, type: 'achievement' });
+                        commit('addCaughtTreasure', treasureToCatch);
+                        commit('incrementTreasuresCount');
+                        if (treasureToCatch.value > 0) {
+                            commit('addMoney', treasureToCatch.value);
+                        }
+                        commit('updateGoalProgress', { type: 'findTreasure', amount: 1 });
+                        commit('updateSpecificGoal', { type: 'findSpecificTreasure', name: treasureToCatch.name });
+                        commit('updateUniqueTreasureGoal');
+                    }
+                } else {
+                    commit('addMessage', { text: 'No hay tesoros en esta zona.', type: 'system' });
+                }
+                commit('setIsFishing', false);
+                commit('setFishingDepth', null);
+            }, 1000);
+            return;
+        }
+
+        setTimeout(() => {
+            // Special deep fishing event (1 in 15 chance)
+            if (Math.random() < 1 / 15) {
+                const availableFish = state.fishTypes.filter(fish => {
+                    const meetsRequirements = !fish.requirements || (state.currentBoat >= fish.requirements.boat && state.currentRod >= fish.requirements.rod);
+                    const availableAtTime = fish.partOfDay.includes(state.currentPartOfDay);
+                    const inZone = fish.zone === state.currentZone;
+                    const isDifficult = fish.isExotic; // Defining difficult fish as exotic
+                    return meetsRequirements && availableAtTime && inZone && isDifficult;
+                });
+
+                if (availableFish.length > 0) {
+                    const totalRarity = availableFish.reduce((sum, fish) => sum + fish.rarity, 0);
+                    let random = Math.random() * totalRarity;
+                    let fishToCatch = null;
+
+                    for (const fish of availableFish) {
+                        random -= fish.rarity;
+                        if (random <= 0) {
+                            fishToCatch = fish;
+                            break;
+                        }
+                    }
+
+                    if (fishToCatch) {
+                        commit('setFishToCatch', fishToCatch);
+                        commit('setFishFighting', true);
+                        commit('setFishFightProgress', 0);
+                        
+                        const requiredTaps = 12;
+                        const timeToCatch = 2; // seconds
+
+                        commit('setFishFightRequiredTaps', requiredTaps);
+                        commit('setFishFightTimer', timeToCatch);
+                        commit('setFishFightActive', true);
+                        commit('addMessage', { text: `¡Un pez enorme ha picado! ¡Toca repetidamente para no dejarlo escapar!`, type: 'warning' });
+
+                        // Start the mini-game timer
+                        let timer = state.fishFightTimer;
+                        const interval = setInterval(() => {
+                            timer--;
+                            commit('setFishFightTimer', timer);
+                            if (timer <= 0) {
+                                clearInterval(interval);
+                                if (state.fishFightProgress < state.fishFightRequiredTaps) {
+                                    dispatch('fightFish', { success: false }); // Fish escapes if time runs out
+                                }
+                            }
+                        }, 1000);
+                        return; // End action here, wait for fight outcome
+                    }
+                }
+            }
+
+            // Treasure hunting logic (if special event doesn't happen)
+            if (Math.random() < 0.05) { // 5% chance of finding a treasure
+                const availableTreasures = state.treasureTypes;
 
                 if (availableTreasures.length > 0) {
                     const totalRarity = availableTreasures.reduce((sum, treasure) => sum + treasure.rarity, 0);
@@ -706,6 +856,7 @@ const store = createStore({
                 }
             }
 
+            // Regular deep fishing (if no special event and no treasure)
             const availableFish = state.fishTypes.filter(fish => {
                 const meetsRequirements = !fish.requirements || (state.currentBoat >= fish.requirements.boat && state.currentRod >= fish.requirements.rod);
                 const availableAtTime = fish.partOfDay.includes(state.currentPartOfDay);
@@ -728,30 +879,21 @@ const store = createStore({
                 }
 
                 if (fishToCatch) {
-                    commit('setFishToCatch', fishToCatch);
-                    commit('setFishFighting', true);
-                    commit('setFishFightProgress', 0);
-                    
-                    const requiredTaps = 12;
-                    const timeToCatch = 2; // seconds
-
-                    commit('setFishFightRequiredTaps', requiredTaps);
-                    commit('setFishFightTimer', timeToCatch);
-                    commit('setFishFightActive', true);
-                    commit('addMessage', { text: `¡Un pez enorme ha picado! ¡Toca repetidamente para no dejarlo escapar!`, type: 'warning' });
-
-                    // Start the mini-game timer
-                    let timer = state.fishFightTimer;
-                    const interval = setInterval(() => {
-                        timer--;
-                        commit('setFishFightTimer', timer);
-                        if (timer <= 0) {
-                            clearInterval(interval);
-                            if (state.fishFightProgress < state.fishFightRequiredTaps) {
-                                dispatch('fightFish', { success: false }); // Fish escapes if time runs out
-                            }
+                    const value = Math.floor(fishToCatch.value * (state.isNight ? 1.5 : 1));
+                    commit('addMessage', { text: `¡Genial! Has atrapado un ${fishToCatch.name} en las profundidades con un valor de ${value}$.`, type: 'catch' });
+                    commit('updateFishingStats', { fish: fishToCatch, value });
+                    commit('addCaughtFish', { ...fishToCatch, value });
+                    if (fishToCatch.isExotic) {
+                        commit('incrementExoticFishCount');
+                        commit('updateGoalProgress', { type: 'catchExoticFish', amount: 1 });
+                        if (fishToCatch.rarity <= 0.005) { // Assuming rarity <= 0.005 means legendary
+                            commit('updateGoalProgress', { type: 'catchLegendaryFish', amount: 1 });
                         }
-                    }, 1000);
+                    } else {
+                        commit('incrementCommonFishCount');
+                        commit('updateGoalProgress', { type: 'catchCommonFish', amount: 1 });
+                    }
+                    commit('addMoney', value);
                 } else {
                     commit('addMessage', { text: 'No parece haber peces difíciles en esta zona.', type: 'system' });
                 }
@@ -946,6 +1088,17 @@ const store = createStore({
         toggleMusic({ commit }) {
             commit('toggleMusic');
         },
+        triggerRandomEvent({ commit }) {
+            const events = [
+                { type: 'storm', effect: 'double_rewards', message: '¡Una tormenta ha llegado! ¡Las recompensas se duplican hoy!' },
+                { type: 'storm', effect: 'halve_rewards', message: '¡Una tormenta ha llegado! ¡Las recompensas se reducen a la mitad hoy!' },
+                { type: 'storm', effect: 'salmon_and_plastic', message: '¡Una extraña tormenta! Hoy solo pican salmones y bolsas de plástico.' },
+                { type: 'treasure_hunt', effect: 'treasures_only', message: '¡Día de búsqueda de tesoros! Hoy solo encontrarás tesoros.' }
+            ];
+            const randomEvent = events[Math.floor(Math.random() * events.length)];
+            commit('setEvent', randomEvent);
+            commit('addMessage', { text: randomEvent.message, type: 'event' });
+        },
     },
     getters: {
         getMoney: (state) => state.money,
@@ -983,8 +1136,8 @@ const store = createStore({
         getFishingDepth: (state) => state.fishingDepth,
         getFishFighting: (state) => state.fishFighting,
         getFishToCatch: (state) => state.fishToCatch,
-        getConsumableInventory: (state) => state.consumableInventory,
-    },
+        getConsumableInventory: (state) => state.consumableInventory
+    }
 });
 
 export default store;

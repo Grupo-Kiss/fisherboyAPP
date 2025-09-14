@@ -5,8 +5,6 @@
       <h2>Configuración</h2>
       <div class="settings-buttons">
         <button class="settings-btn" @click="openModal('instructions')">Instrucciones</button>
-        <button class="settings-btn" @click="openModal('goals')">Objetivos</button>
-        <button class="settings-btn" @click="openModal('treasures')">Tesoros</button>
         <button class="settings-btn" @click="openModal('stats')">Estadísticas</button>
         <button class="btn-restart" @click="restartGame">Reiniciar Juego</button>
         <button class="btn-credits" @click="openModal('credits')">Créditos</button>

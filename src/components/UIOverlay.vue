@@ -11,28 +11,35 @@
       <div class="stats-line">
         <div class="stat-item">{{ currentZoneName }}</div>
         <div class="stat-item">{{ formattedTime }}</div>
-        <Weather />
+        <div class="stat-item">{{ seasonIcon }}</div>
+        <div class="stat-item">{{ temperature }}°C</div>
       </div>
     </div>
 
     <div id="energy-bar-container" :class="energyColorClass">
-      <div id="energy-fill" :style="{ height: getEnergy + '%' }"></div>
+      <div id="energy-fill" :style="{ width: getEnergy + '%' }"></div>
     </div>
 
     <img src="/src/img/muelle.svg" alt="Muelle" class="muelle-img" />
 
+    <div id="consumable-buttons">
+      <button class="btn-icon" @click="useConsumable('coffee')" :disabled="consumableInventory.coffee === 0">☕<span class="btn-label">{{ consumableInventory.coffee }}</span></button>
+      <button class="btn-icon" @click="useConsumable('energyDrink')" :disabled="consumableInventory.energyDrink === 0">🥤<span class="btn-label">{{ consumableInventory.energyDrink }}</span></button>
+      <button class="btn-icon" @click="goToSleep" :disabled="!canSleep">🛏️<span class="btn-label"></span><span class="btn-text">${{ sleepCost }}</span></button>
+    </div>
+
     <div id="deep-fish-button-container">
       <button class="btn-icon" @click="startDeepFishing">⚓<span class="btn-label"></span></button>
-      <button class="btn-icon" @click="useConsumable('coffee')" :disabled="consumableInventory.coffee === 0">☕<span class="btn-label"> ({{ consumableInventory.coffee }})</span></button>
-      <button class="btn-icon" @click="useConsumable('energyDrink')" :disabled="consumableInventory.energyDrink === 0">🥤<span class="btn-label"> ({{ consumableInventory.energyDrink }})</span></button>
+      <button class="btn-icon" @click="recycleAllTrash">♻️<span class="btn-label"></span></button>
+      <button class="btn-icon" @click="sellAllFish">💰<span class="btn-label"></span></button>
     </div>
 
     <MessageConsole />
     <div id="bottom-bar">
-        <button class="btn-icon" @click="goToSleep" :disabled="!canSleep">🛏️<span class="btn-label"></span><span class="btn-text">(${{ sleepCost }})</span></button>
-        <button class="btn-icon" @click="toggleModal('recycle')">♻️<span class="btn-label"></span></button>
         <button class="btn-icon" @click="toggleModal('market')">🛒<span class="btn-label"></span></button>
         <button class="btn-icon" @click="openMap">🗺️<span class="btn-label"></span></button>
+        <button class="btn-icon" @click="toggleModal('treasures')">💎<span class="btn-label"></span></button>
+        <button class="btn-icon" @click="toggleModal('goals')">🎯<span class="btn-label"></span></button>
         <button class="btn-icon" @click="toggleModal('settings')">⚙️<span class="btn-label"></span></button>
     </div>
 
@@ -49,13 +56,11 @@
 <script>
 import { computed, watchEffect } from 'vue';
 import { useStore } from 'vuex';
-import Weather from './Weather.vue';
 import MessageConsole from './MessageConsole.vue';
 
 export default {
   name: 'UIOverlay',
   components: {
-    Weather,
     MessageConsole,
   },
   setup() {
@@ -85,6 +90,18 @@ export default {
     const currentZone = computed(() => store.state.zones.find(z => z.id === store.state.currentZone));
     const currentZoneName = computed(() => currentZone.value ? currentZone.value.name : '');
     const currentZoneColor = computed(() => currentZone.value ? currentZone.value.color : 'rgba(0, 0, 0, 0.7)');
+
+    const temperature = computed(() => store.getters.getTemperature);
+
+        const seasonIcon = computed(() => {
+      switch (store.getters.getCurrentSeason) {
+        case 'spring': return '🌸';
+        case 'summer': return '☀️';
+        case 'autumn': return '🍂';
+        case 'winter': return '❄️';
+        default: return '';
+      }
+    });
 
     return {
       getMoney: computed(() => store.getters.getMoney),
@@ -126,6 +143,10 @@ export default {
       fishFightTimer: computed(() => store.state.fishFightTimer),
       tapToFightFish: () => store.dispatch('tapToFightFish'),
       moveBoat: (coords) => store.dispatch('moveBoat', coords),
+      temperature,
+      seasonIcon,
+      recycleAllTrash: () => store.dispatch('recycleAllTrash'),
+      sellAllFish: () => store.dispatch('sellAllFish'),
     };
   },
 };
@@ -163,23 +184,19 @@ export default {
 
 #energy-bar-container {
   position: fixed;
-  top: 50%;
-  left: 10px;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 150px;
+  top: 55px; /* Position below the top bar */
+  left: 0;
+  width: 100%;
+  height: 10px;
   background: rgba(0,0,0,0.6);
-  border-radius: 10px;
-  overflow: hidden;
   z-index: 100;
-  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 #energy-fill {
-  width: 100%;
-  transition: height 0.5s, background-color 0.5s;
+  height: 100%;
+  transition: width 0.5s, background-color 0.5s;
   position: absolute;
-  bottom: 0;
+  left: 0;
 }
 
 .energy-high #energy-fill {
@@ -203,7 +220,7 @@ export default {
 
 .muelle-img {
   position: fixed;
-  top: 50%;
+  top: 60%;
   left: 0;
   transform: translateY(-50%);
   width: 300px; /* Adjust as needed */
@@ -213,9 +230,18 @@ export default {
 
 #deep-fish-button-container {
   position: fixed;
-  top: 50%;
+  top: 75px;
   right: 10px;
-  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#consumable-buttons {
+  position: fixed;
+  top: 75px;
+  left: 10px;
   z-index: 100;
   display: flex;
   flex-direction: column;

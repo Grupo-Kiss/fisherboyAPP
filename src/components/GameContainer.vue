@@ -97,9 +97,7 @@ export default {
 
       // If it's not a swipe, it's a tap
       if (Math.abs(deltaX) < swipeThreshold && Math.abs(deltaY) < swipeThreshold) {
-        if (!fishFighting.value) {
-          store.dispatch('startFishing');
-        }
+        // Do nothing on tap, fishing is handled by clicking the fisherboy
       }
     };
 
